@@ -16,7 +16,6 @@ import android.nfc.tech.NfcF
 import android.nfc.tech.NfcV
 import android.os.Build
 import android.os.Bundle
-import android.os.CombinedVibration
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -42,8 +41,6 @@ class MainActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
 
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
         setupNfcForegroundDispatch()
-
-        // Handle initial NFC intent if launched from tag tap
         handleNfcIntent(intent)
 
         setContent {
@@ -57,7 +54,6 @@ class MainActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
         super.onResume()
         viewModel.updateNfcStatus(nfcAdapter)
 
-        // Enable reader mode for continuous modern scanning
         val flags = NfcAdapter.FLAG_READER_NFC_A or
                 NfcAdapter.FLAG_READER_NFC_B or
                 NfcAdapter.FLAG_READER_NFC_F or
@@ -66,7 +62,6 @@ class MainActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
 
         nfcAdapter?.enableReaderMode(this, this, flags, null)
 
-        // Enable Foreground Dispatch as fallback for older devices / intents
         try {
             pendingIntent?.let { pi ->
                 nfcAdapter?.enableForegroundDispatch(this, pi, intentFiltersArray, techListsArray)
@@ -88,9 +83,6 @@ class MainActivity : ComponentActivity(), NfcAdapter.ReaderCallback {
         handleNfcIntent(intent)
     }
 
-    /**
-     * ReaderMode Callback (runs on background thread when card is tapped)
-     */
     override fun onTagDiscovered(tag: Tag) {
         runOnUiThread {
             viewModel.onTagDiscovered(tag, ::vibrateHaptic)

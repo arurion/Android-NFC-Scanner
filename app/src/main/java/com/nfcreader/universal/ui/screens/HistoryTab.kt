@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.data.db.TagScanEntity
 import com.nfcreader.universal.ui.theme.GlassPanel
+import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.StatusRose
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -139,17 +142,25 @@ fun HistoryTab(
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            GlassPanel(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                shape = GlassTokens.shape(GlassTokens.radiusLarge)
             ) {
-                items(filteredList, key = { it.id }) { entity ->
-                    HistoryItemCard(
-                        entity = entity,
-                        dateFormat = dateFormat,
-                        onSelect = { onSelectTag(entity) },
-                        onDelete = { onDeleteItem(entity) }
-                    )
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    itemsIndexed(filteredList, key = { _, it -> it.id }) { idx, entity ->
+                        if (idx > 0) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 14.dp),
+                                color = GlassTokens.edgeStroke
+                            )
+                        }
+                        HistoryItemRow(
+                            entity = entity,
+                            dateFormat = dateFormat,
+                            onSelect = { onSelectTag(entity) },
+                            onDelete = { onDeleteItem(entity) }
+                        )
+                    }
                 }
             }
         }
@@ -180,75 +191,69 @@ fun HistoryTab(
 }
 
 @Composable
-fun HistoryItemCard(
+fun HistoryItemRow(
     entity: TagScanEntity,
     dateFormat: SimpleDateFormat,
     onSelect: () -> Unit,
     onDelete: () -> Unit
 ) {
-    GlassPanel(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onSelect)
+            .padding(horizontal = 14.dp, vertical = 12.dp)
             .testTag("history_card_${entity.id}"),
-        shape = RoundedCornerShape(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = entity.cardTitle,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    if (entity.balance != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Text(
-                                text = "¥%,d".format(entity.balance),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = entity.cardTitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (entity.balance != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(GlassTokens.radiusSmall),
+                        color = MaterialTheme.colorScheme.primaryContainer
+                    ) {
+                        Text(
+                            text = "¥%,d".format(entity.balance),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                        )
                     }
                 }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = "UID: ${entity.uidHex}",
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Text(
-                    text = dateFormat.format(Date(entity.timestamp)),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
 
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.testTag("delete_history_item_${entity.id}")
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "削除",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                )
-            }
+            Spacer(modifier = Modifier.height(2.dp))
+
+            Text(
+                text = "UID: ${entity.uidHex}",
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = dateFormat.format(Date(entity.timestamp)),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.testTag("delete_history_item_${entity.id}")
+        ) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "削除",
+                tint = StatusRose
+            )
         }
     }
 }

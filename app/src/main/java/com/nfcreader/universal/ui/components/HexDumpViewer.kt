@@ -16,17 +16,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -38,7 +36,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -46,6 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nfcreader.universal.model.MemoryBlock
+import com.nfcreader.universal.ui.theme.GlassPanel
+import com.nfcreader.universal.ui.theme.GlassTokens
 
 @Composable
 fun HexDumpViewer(
@@ -94,10 +93,10 @@ fun HexDumpViewer(
             ) {
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
-                    contentDescription = "ダンプをコピー",
-                    modifier = Modifier.padding(end = 4.dp)
+                    contentDescription = null,
+                    modifier = Modifier.padding(end = 4.dp).size(16.dp)
                 )
-                Text("全ダンプをコピー")
+                Text("全ダンプをコピー", style = MaterialTheme.typography.labelSmall)
             }
         }
 
@@ -106,7 +105,7 @@ fun HexDumpViewer(
             onValueChange = { searchQuery = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp)
+                .padding(bottom = 10.dp)
                 .testTag("search_hex_input"),
             placeholder = { Text("Hexバイト、ASCII文字列、ブロック番号で検索...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "検索") },
@@ -114,12 +113,7 @@ fun HexDumpViewer(
         )
 
         if (filteredBlocks.isEmpty()) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
+            GlassPanel(modifier = Modifier.fillMaxWidth()) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,12 +128,21 @@ fun HexDumpViewer(
                 }
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            // Anti-Bento Grid: 1つの統合パネル内に等幅のデータ行を並べる
+            GlassPanel(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                shape = GlassTokens.shape(GlassTokens.radiusLarge)
             ) {
-                items(filteredBlocks, key = { it.index }) { block ->
-                    MemoryBlockRow(block = block)
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    itemsIndexed(filteredBlocks, key = { _, it -> it.index }) { idx, block ->
+                        if (idx > 0) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                color = GlassTokens.edgeStroke
+                            )
+                        }
+                        MemoryBlockRow(block = block)
+                    }
                 }
             }
         }
@@ -148,109 +151,98 @@ fun HexDumpViewer(
 
 @Composable
 fun MemoryBlockRow(block: MemoryBlock) {
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("memory_block_${block.index}"),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (block.isProtected) MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            else MaterialTheme.colorScheme.surfaceVariant
-        )
+            .padding(horizontal = 10.dp, vertical = 8.dp)
+            .testTag("memory_block_${block.index}")
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = "#%03d (0x%02X)".format(block.index, block.index),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-
-                    if (block.description != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = block.description,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                if (block.isProtected) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = "保護",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(end = 4.dp)
-                        )
-                        Text(
-                            text = "保護",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Scrollable monospace hex bytes and ASCII
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = block.hex,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp,
-                        letterSpacing = 0.5.sp
-                    ),
-                    color = if (block.isProtected) Color.Gray else MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.background.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(4.dp)
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(GlassTokens.radiusSmall)
                         )
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
-                        text = block.ascii,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 12.sp
-                        ),
-                        color = MaterialTheme.colorScheme.onBackground
+                        text = "#%03d (0x%02X)".format(block.index, block.index),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+
+                if (block.description != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = block.description,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            if (block.isProtected) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "保護",
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(end = 4.dp).size(14.dp)
+                    )
+                    Text(
+                        text = "保護",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = block.hex,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp,
+                    letterSpacing = 0.5.sp
+                ),
+                color = if (block.isProtected) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        shape = RoundedCornerShape(GlassTokens.radiusSmall)
+                    )
+                    .padding(horizontal = 6.dp, vertical = 2.dp)
+            ) {
+                Text(
+                    text = block.ascii,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }

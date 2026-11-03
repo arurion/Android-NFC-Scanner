@@ -12,17 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -95,7 +91,6 @@ fun BinaryTab(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        // Header info & Export
         GlassPanel(
             modifier = Modifier
                 .fillMaxWidth()
@@ -140,7 +135,6 @@ fun BinaryTab(
             }
         }
 
-        // Hex Dump Viewer Component
         HexDumpViewer(
             blocks = tag.memoryBlocks,
             fullDumpText = tag.allHexDump,

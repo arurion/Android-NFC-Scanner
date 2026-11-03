@@ -1,7 +1,6 @@
 package com.nfcreader.universal.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Key
@@ -43,12 +41,6 @@ import com.nfcreader.universal.ui.theme.GlassTokens
 import com.nfcreader.universal.ui.theme.SaxBlueDeep
 import com.nfcreader.universal.ui.theme.StatusRose
 
-/**
- * Lets the user register their own MIFARE Classic keys (Key A/B) — for cards they
- * already know the key to, such as a personal access card, a student ID, or a tag
- * they programmed themselves. Registered keys are tried automatically, alongside the
- * built-in public default keys, whenever a MIFARE Classic tag is scanned.
- */
 @Composable
 fun KeysTab(
     keys: List<CustomKeyEntity>,
@@ -69,7 +61,6 @@ fun KeysTab(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Purpose, shown before any input field (目的を先に).
         item {
             Column {
                 Text(
@@ -86,7 +77,6 @@ fun KeysTab(
             }
         }
 
-        // Add-key form, grouped as one glass panel (目的→入力の順).
         item {
             GlassPanel(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -169,8 +159,6 @@ fun KeysTab(
             }
         }
 
-        // Registered keys, as a continuous list of rows inside one panel
-        // (not split into one card per key).
         item {
             Text(
                 text = "登録済みの鍵 (${keys.size}件)",

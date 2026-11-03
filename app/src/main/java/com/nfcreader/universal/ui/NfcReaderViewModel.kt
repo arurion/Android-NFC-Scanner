@@ -1,7 +1,6 @@
 package com.nfcreader.universal.ui
 
 import android.app.Application
-import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import androidx.lifecycle.AndroidViewModel
@@ -14,7 +13,6 @@ import com.nfcreader.universal.data.db.AppDatabase
 import com.nfcreader.universal.data.db.CustomKeyEntity
 import com.nfcreader.universal.data.db.TagScanEntity
 import com.nfcreader.universal.model.NfcTagData
-import com.nfcreader.universal.model.TagStandard
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +36,6 @@ data class NfcUiState(
     val errorBanner: String? = null
 )
 
-/** Result of validating a user-entered custom key, surfaced to the Keys screen. */
 sealed class KeyInputError {
     object InvalidLength : KeyInputError()
     object InvalidChars : KeyInputError()
@@ -66,7 +63,6 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             com.nfcreader.universal.data.StationDatabase.initializeFromAssets(application)
         }
-        // Load initial demo tag so that users viewing the app in emulator have immediate data to interact with
         viewModelScope.launch {
             val defaultDemo = DemoCards.createSuicaDemo()
             _uiState.value = _uiState.value.copy(
@@ -105,7 +101,6 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
                     HexUtils.hexToBytesOrNull(it.keyHex)
                 }
                 val parsedTag = NfcTagReader.readTag(tag, customKeyBytes)
-                // Automatically switch to Transit tab if it's a transit card, else Specs
                 val nextTab = if (parsedTag.transitCardInfo != null) 1 else 2
 
                 _uiState.value = _uiState.value.copy(
@@ -115,7 +110,6 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
                     statusMessage = "読取完了: ${parsedTag.standardLabel} (UID: ${parsedTag.idHex})"
                 )
 
-                // Save to database
                 val entity = TagConverter.toEntity(parsedTag)
                 dao.insertScan(entity)
             } catch (e: Exception) {
@@ -144,7 +138,7 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
         val tag = DemoCards.createMifareClassicDemo()
         _uiState.value = _uiState.value.copy(
             currentTag = tag,
-            selectedTab = 3, // Go to Binary dump
+            selectedTab = 3,
             statusMessage = "MIFARE Classic 1K デモデータを読み込みました"
         )
         viewModelScope.launch {
@@ -156,7 +150,7 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
         val tag = DemoCards.createNdefDemo()
         _uiState.value = _uiState.value.copy(
             currentTag = tag,
-            selectedTab = 2, // Go to Specs / NDEF
+            selectedTab = 2,
             statusMessage = "NDEF Smart Poster / URL デモデータを読み込みました"
         )
         viewModelScope.launch {
@@ -194,10 +188,6 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.value = _uiState.value.copy(errorBanner = null)
     }
 
-    /**
-     * Registers a user-supplied MIFARE Classic key (Key A/B, 12 hex chars / 6 bytes).
-     * Returns true on success; on failure, [keyInputError] explains why.
-     */
     fun addCustomKey(label: String, hexInput: String): Boolean {
         val normalized = HexUtils.normalizeHex(hexInput)
         if (normalized.length != HexUtils.MIFARE_KEY_HEX_LENGTH) {

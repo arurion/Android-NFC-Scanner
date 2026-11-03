@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +45,7 @@ import com.nfcreader.universal.ui.NfcReaderViewModel
 import com.nfcreader.universal.ui.theme.GlassTokens
 import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.SaxBlueDeep
+import com.nfcreader.universal.ui.theme.TextNavyMuted
 import com.nfcreader.universal.ui.theme.glassChrome
 
 data class NavTabItem(
@@ -81,21 +84,24 @@ fun HomeScreen(
         selectedIconColor = SaxBlueDeep,
         selectedTextColor = SaxBlueDeep,
         indicatorColor = SaxBlue.copy(alpha = GlassTokens.alphaChromeActive),
-        unselectedIconColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-        unselectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+        unselectedIconColor = TextNavyMuted,
+        unselectedTextColor = TextNavyMuted
     )
     val railItemColors = NavigationRailItemDefaults.colors(
         selectedIconColor = SaxBlueDeep,
         selectedTextColor = SaxBlueDeep,
         indicatorColor = SaxBlue.copy(alpha = GlassTokens.alphaChromeActive),
-        unselectedIconColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
-        unselectedTextColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+        unselectedIconColor = TextNavyMuted,
+        unselectedTextColor = TextNavyMuted
     )
+
+    // ガラス上のタイトル文字に柔らかい白い光彩を敷き、可読性を死守
+    val captionGlow = Shadow(color = Color.White.copy(alpha = 0.85f), blurRadius = 10f)
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxSize()
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         val isWideScreen = maxWidth >= 600.dp
 
@@ -111,32 +117,33 @@ fun HomeScreen(
                             Text(
                                 text = "NFC Reader",
                                 fontWeight = FontWeight.Bold,
-                                style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
-                                    shadow = androidx.compose.ui.graphics.Shadow(
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        blurRadius = 12f
-                                    )
-                                )
+                                style = MaterialTheme.typography.titleLarge.copy(shadow = captionGlow)
                             )
                             if (uiState.currentTag != null) {
                                 Text(
                                     text = " - ${uiState.currentTag?.standardLabel}",
                                     fontWeight = FontWeight.Normal,
-                                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                                    style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(start = 8.dp, top = 4.dp),
                                     maxLines = 1
                                 )
                             }
                         }
                     },
-                    modifier = Modifier.glassChrome(tint = SaxBlue, alpha = GlassTokens.alphaChromeActive),
+                    modifier = Modifier.glassChrome(
+                        tint = SaxBlue,
+                        alpha = GlassTokens.alphaChromeActive
+                    ),
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
                 )
             },
             bottomBar = {
                 if (!isWideScreen) {
                     NavigationBar(
-                        modifier = Modifier.glassChrome(tint = SaxBlue, alpha = GlassTokens.alphaChromeBase),
+                        modifier = Modifier.glassChrome(
+                            tint = SaxBlue,
+                            alpha = GlassTokens.alphaChromeBase
+                        ),
                         containerColor = Color.Transparent
                     ) {
                         tabs.forEachIndexed { index, tab ->
@@ -163,7 +170,10 @@ fun HomeScreen(
                     NavigationRail(
                         modifier = Modifier
                             .fillMaxHeight()
-                            .glassChrome(tint = SaxBlue, alpha = GlassTokens.alphaChromeBase),
+                            .glassChrome(
+                                tint = SaxBlue,
+                                alpha = GlassTokens.alphaChromeBase
+                            ),
                         containerColor = Color.Transparent
                     ) {
                         tabs.forEachIndexed { index, tab ->

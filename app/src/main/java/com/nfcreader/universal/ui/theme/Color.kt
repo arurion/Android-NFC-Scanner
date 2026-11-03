@@ -4,36 +4,27 @@ import androidx.compose.ui.graphics.Color
 
 // ---- Tinted-glass palette (HSV H≈200-215°, V=100%, S controls depth) ----
 
-/** Sax white: near-white background tint (HSV 210°,10%,100%). */
+/** サックスホワイト: ほぼ白に近い淡い水色の背景基準色 (HSV 210°, 10%, 100%) */
 val SaxWhite = Color(0xFFEAF5FF)
 
-/** Sax blue: the glass tint color (HSV 215°,50%,100%). */
+/** サックスブルー: ガラスのティント色 (HSV 215°, 50%, 100%) */
 val SaxBlue = Color(0xFF88BBFF)
 
-/** Deeper, more saturated sax blue for the active/current-location state. */
-val SaxBlueDeep = Color(0xFF4A86E8)
+/** 現在地・選択中を示す、彩度を少し高めたスカイブルー */
+val SaxBlueDeep = Color(0xFF2563EB)
 
-/** Pink accent, +120° from sax blue, same tone — used sparingly for rare highlights. */
+/** 差し色: 色相+120°の淡いピンク (ごく少量だけ使用) */
 val AccentPink = Color(0xFFFF99DD)
 
-/** Deep navy text (never pure black). */
+/** 文字色: 純黒ではなく深いネイビー (コントラスト比4.5:1以上を確保) */
 val TextNavy = Color(0xFF0F172A)
 val TextNavyMuted = Color(0xFF47587A)
 
-/** Smoky silver-grey edge stroke (not pure white, avoids a "ギラつく" look). */
+/** 縁取り: ギラつかないスモーキーなシルバーグレー (#64748B系) */
 val EdgeSilver = Color(0xFF64748B)
 
-/** Status colors, kept in the same low-saturation pastel family as the rest of the UI. */
-val StatusGreen = Color(0xFF2E9E6B)
-val StatusAmber = Color(0xFFC98A1A)
-val StatusRose = Color(0xFFD1527A)
-val StatusPurple = Color(0xFF8B6FD6)
-
-// ---- Dark variant: a deep, color-tinted navy (never a washed-out grey), reserved
-// for when the system is explicitly in dark mode. Highlights are sharper against it. ----
-val NightSurface = Color(0xFF111A2E)
-val NightSurfaceElevated = Color(0xFF17213A)
-val NightBackground = Color(0xFF0B1220)
-val NightGlassTint = Color(0xFF3B6FD4)
-val NightText = Color(0xFFE7EEFC)
-val NightTextMuted = Color(0xFFA9B8D6)
+/** 状態色: トーンを揃えた落ち着いたパステル */
+val StatusGreen = Color(0xFF10B981)
+val StatusAmber = Color(0xFFF59E0B)
+val StatusRose = Color(0xFFE11D48)
+val StatusPurple = Color(0xFF8B5CF6)

@@ -2,9 +2,7 @@ package com.nfcreader.universal.ui.screens
 
 import android.content.Intent
 import android.provider.Settings
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -20,20 +18,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.Nfc
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -44,15 +36,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.nfcreader.universal.model.NfcTagData
 import com.nfcreader.universal.ui.NfcHardwareState
 import com.nfcreader.universal.ui.NfcUiState
 import com.nfcreader.universal.ui.components.NfcRadarAnimation
@@ -81,7 +70,6 @@ fun ScannerTab(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Warning banner for disabled or unsupported hardware
         if (state.hardwareState != NfcHardwareState.AVAILABLE_AND_ENABLED) {
             GlassPanel(
                 modifier = Modifier
@@ -114,7 +102,7 @@ fun ScannerTab(
                             text = if (state.hardwareState == NfcHardwareState.DISABLED)
                                 "端末の設定からNFCをONにしてください。"
                             else
-                                "物理NFCがない環境でも、下の「デモカード」機能ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
+                                "物理NFCがない環境でも、下の「テスト用デモデータ」ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -138,15 +126,14 @@ fun ScannerTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // NFC Radar Sensor visualizer
         NfcRadarAnimation(
-            size = 200.dp,
+            size = 190.dp,
             isActive = state.hardwareState == NfcHardwareState.AVAILABLE_AND_ENABLED
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         Text(
             text = "NFC タグ読み取り待機中",
@@ -155,7 +142,7 @@ fun ScannerTab(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(4.dp))
 
         Text(
             text = state.statusMessage,
@@ -165,9 +152,8 @@ fun ScannerTab(
             modifier = Modifier.padding(horizontal = 24.dp)
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-        // Current scanned tag banner if available
         if (state.currentTag != null) {
             val tag = state.currentTag
             GlassPanel(
@@ -184,7 +170,7 @@ fun ScannerTab(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Surface(
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(GlassTokens.radiusSmall),
                             color = MaterialTheme.colorScheme.primaryContainer
                         ) {
                             Text(
@@ -192,7 +178,7 @@ fun ScannerTab(
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
 
@@ -204,7 +190,7 @@ fun ScannerTab(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
                         text = tag.standardLabel,
@@ -257,10 +243,9 @@ fun ScannerTab(
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Demo Card simulation section
         GlassPanel(
             modifier = Modifier.fillMaxWidth(),
             shape = GlassTokens.shape(GlassTokens.radiusLarge)
@@ -291,7 +276,7 @@ fun ScannerTab(
                     ) {
                         Icon(Icons.Default.Train, contentDescription = null, modifier = Modifier.size(16.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Suicaデモ", maxLines = 1)
+                        Text("Suica", maxLines = 1)
                     }
 
                     FilledTonalButton(
@@ -319,9 +304,8 @@ fun ScannerTab(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-        // Supported Standards chips
         Text(
             text = "対応NFC規格・技術一覧",
             style = MaterialTheme.typography.titleSmall,
