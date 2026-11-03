@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.data.db.TagScanEntity
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxWhite
 import com.nfcreader.universal.ui.theme.StatusRose
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -64,43 +65,22 @@ fun HistoryTab(
         else {
             val q = searchQuery.trim().lowercase()
             historyList.filter {
-                it.cardTitle.lowercase().contains(q) ||
-                        it.uidHex.lowercase().contains(q) ||
-                        it.standardName.lowercase().contains(q)
+                it.cardTitle.lowercase().contains(q) || it.uidHex.lowercase().contains(q) || it.standardName.lowercase().contains(q)
             }
         }
     }
-
     val dateFormat = remember { SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.JAPAN) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "スキャン履歴 (${historyList.size} 件)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text(text = "スキャン履歴 (${historyList.size} 件)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             if (historyList.isNotEmpty()) {
-                IconButton(
-                    onClick = { showClearDialog = true },
-                    modifier = Modifier.testTag("clear_all_history_button")
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DeleteSweep,
-                        contentDescription = "履歴をすべて削除",
-                        tint = MaterialTheme.colorScheme.error
-                    )
+                IconButton(onClick = { showClearDialog = true }, modifier = Modifier.testTag("clear_all_history_button")) {
+                    Icon(Icons.Default.DeleteSweep, contentDescription = "全削除", tint = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -109,10 +89,7 @@ fun HistoryTab(
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
-                    .testTag("search_history_input"),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp).testTag("search_history_input"),
                 placeholder = { Text("カード名・UIDで履歴を検索...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = "検索") },
                 singleLine = true
@@ -120,46 +97,19 @@ fun HistoryTab(
         }
 
         if (filteredList.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().weight(1f), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.History,
-                        contentDescription = null,
-                        modifier = Modifier.size(54.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                    )
+                    Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(54.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = if (historyList.isEmpty()) "保存されたスキャン履歴はありません" else "該当する履歴がありません",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = if (historyList.isEmpty()) "保存された履歴はありません" else "該当する履歴がありません", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         } else {
-            GlassPanel(
-                modifier = Modifier.fillMaxWidth().weight(1f),
-                shape = GlassTokens.shape(GlassTokens.radiusLarge)
-            ) {
+            GlassPanel(modifier = Modifier.fillMaxWidth().weight(1f), shape = GlassTokens.shape(GlassTokens.radiusLarge), tint = SaxWhite, alpha = 0.46f) {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(filteredList, key = { _, it -> it.id }) { idx, entity ->
-                        if (idx > 0) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 14.dp),
-                                color = GlassTokens.edgeStroke
-                            )
-                        }
-                        HistoryItemRow(
-                            entity = entity,
-                            dateFormat = dateFormat,
-                            onSelect = { onSelectTag(entity) },
-                            onDelete = { onDeleteItem(entity) }
-                        )
+                        if (idx > 0) HorizontalDivider(modifier = Modifier.padding(horizontal = 14.dp), color = GlassTokens.edgeStroke)
+                        HistoryItemRow(entity = entity, dateFormat = dateFormat, onSelect = { onSelectTag(entity) }, onDelete = { onDeleteItem(entity) })
                     }
                 }
             }
@@ -170,90 +120,36 @@ fun HistoryTab(
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
             title = { Text("履歴の全件削除") },
-            text = { Text("これまでにスキャンしたすべてのタグ履歴を削除しますか？この操作は取り消せません。") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onClearAll()
-                        showClearDialog = false
-                    }
-                ) {
-                    Text("削除する", color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) {
-                    Text("キャンセル")
-                }
-            }
+            text = { Text("すべてのタグ履歴を削除しますか？") },
+            confirmButton = { TextButton(onClick = { onClearAll(); showClearDialog = false }) { Text("削除する", color = MaterialTheme.colorScheme.error) } },
+            dismissButton = { TextButton(onClick = { showClearDialog = false }) { Text("キャンセル") } }
         )
     }
 }
 
 @Composable
-fun HistoryItemRow(
-    entity: TagScanEntity,
-    dateFormat: SimpleDateFormat,
-    onSelect: () -> Unit,
-    onDelete: () -> Unit
-) {
+fun HistoryItemRow(entity: TagScanEntity, dateFormat: SimpleDateFormat, onSelect: () -> Unit, onDelete: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect)
-            .padding(horizontal = 14.dp, vertical = 12.dp)
-            .testTag("history_card_${entity.id}"),
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onSelect).padding(horizontal = 14.dp, vertical = 12.dp).testTag("history_card_${entity.id}"),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = entity.cardTitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = entity.cardTitle, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 if (entity.balance != null) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                        color = MaterialTheme.colorScheme.primaryContainer
-                    ) {
-                        Text(
-                            text = "¥%,d".format(entity.balance),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
+                    Surface(shape = RoundedCornerShape(GlassTokens.radiusSmall), color = MaterialTheme.colorScheme.primaryContainer) {
+                        Text(text = "¥%,d".format(entity.balance), style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                     }
                 }
             }
-
             Spacer(modifier = Modifier.height(2.dp))
-
-            Text(
-                text = "UID: ${entity.uidHex}",
-                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = dateFormat.format(Date(entity.timestamp)),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = "UID: ${entity.uidHex}", style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace), color = MaterialTheme.colorScheme.primary)
+            Text(text = dateFormat.format(Date(entity.timestamp)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier.testTag("delete_history_item_${entity.id}")
-        ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "削除",
-                tint = StatusRose
-            )
+        IconButton(onClick = onDelete, modifier = Modifier.testTag("delete_history_item_${entity.id}")) {
+            Icon(Icons.Default.Delete, contentDescription = "削除", tint = StatusRose)
         }
     }
 }

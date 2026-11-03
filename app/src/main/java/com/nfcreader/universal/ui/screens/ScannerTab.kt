@@ -48,6 +48,7 @@ import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxWhite
 import com.nfcreader.universal.ui.theme.StatusRose
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -65,27 +66,15 @@ fun ScannerTab(
     val scrollState = rememberScrollState()
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp),
+        modifier = modifier.fillMaxSize().verticalScroll(scrollState).padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if (state.hardwareState != NfcHardwareState.AVAILABLE_AND_ENABLED) {
             GlassPanel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .testTag("hardware_warning_card"),
-                tint = if (state.hardwareState == NfcHardwareState.DISABLED)
-                    StatusRose.copy(alpha = 0.5f)
-                else
-                    MaterialTheme.colorScheme.surfaceVariant
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp).testTag("hardware_warning_card"),
+                tint = if (state.hardwareState == NfcHardwareState.DISABLED) StatusRose.copy(alpha = 0.5f) else SaxWhite
             ) {
-                Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         imageVector = if (state.hardwareState == NfcHardwareState.DISABLED) Icons.Default.Warning else Icons.Default.Info,
                         contentDescription = "Status",
@@ -94,27 +83,13 @@ fun ScannerTab(
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = if (state.hardwareState == NfcHardwareState.DISABLED) "NFC機能が無効です" else "NFC非搭載 / エミュレータ環境",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = if (state.hardwareState == NfcHardwareState.DISABLED)
-                                "端末の設定からNFCをONにしてください。"
-                            else
-                                "物理NFCがない環境でも、下の「デモデータ」機能ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        Text(text = if (state.hardwareState == NfcHardwareState.DISABLED) "NFC機能が無効です" else "NFC非搭載 / エミュレータ環境", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                        Text(text = if (state.hardwareState == NfcHardwareState.DISABLED) "端末の設定からNFCをONにしてください。" else "デモデータ機能ですべての機能（駅名解析・バイナリダンプ等）を体験できます。", style = MaterialTheme.typography.bodySmall)
                     }
                     if (state.hardwareState == NfcHardwareState.DISABLED) {
                         OutlinedButton(
                             onClick = {
-                                try {
-                                    context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
-                                } catch (_: Exception) {
-                                    context.startActivity(Intent(Settings.ACTION_SETTINGS))
-                                }
+                                try { context.startActivity(Intent(Settings.ACTION_NFC_SETTINGS)) } catch (_: Exception) { context.startActivity(Intent(Settings.ACTION_SETTINGS)) }
                             },
                             modifier = Modifier.testTag("open_nfc_settings_button")
                         ) {
@@ -128,111 +103,49 @@ fun ScannerTab(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        NfcRadarAnimation(
-            size = 190.dp,
-            isActive = state.hardwareState == NfcHardwareState.AVAILABLE_AND_ENABLED
-        )
-
+        NfcRadarAnimation(size = 190.dp, isActive = state.hardwareState == NfcHardwareState.AVAILABLE_AND_ENABLED)
         Spacer(modifier = Modifier.height(14.dp))
-
-        Text(
-            text = "NFC タグ読み取り待機中",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            textAlign = TextAlign.Center
-        )
-
+        Text(text = "NFC タグ読み取り待機中", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = state.statusMessage,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp)
-        )
-
+        Text(text = state.statusMessage, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 24.dp))
         Spacer(modifier = Modifier.height(18.dp))
 
         if (state.currentTag != null) {
             val tag = state.currentTag
             GlassPanel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("scanned_tag_summary_card"),
+                modifier = Modifier.fillMaxWidth().testTag("scanned_tag_summary_card"),
                 shape = GlassTokens.shape(GlassTokens.radiusLarge),
+                tint = SaxWhite,
+                alpha = 0.46f,
                 elevated = true
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Surface(
-                            shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
-                        ) {
-                            Text(
-                                text = "検出中のカード",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                            )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                        Surface(shape = RoundedCornerShape(GlassTokens.radiusSmall), color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)) {
+                            Text(text = "検出中のカード", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                         }
-
-                        Text(
-                            text = "UID: ${tag.idHex}",
-                            style = MaterialTheme.typography.labelMedium,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "UID: ${tag.idHex}", style = MaterialTheme.typography.labelMedium, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = tag.standardLabel,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = tag.standardLabel, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
                     if (tag.transitCardInfo != null) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = "残高: ¥%,d | 履歴: %d件".format(
-                                tag.transitCardInfo.currentBalance,
-                                tag.transitCardInfo.transactions.size
-                            ),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "残高: ¥%,d | 履歴: %d件".format(tag.transitCardInfo.currentBalance, tag.transitCardInfo.transactions.size), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         if (tag.transitCardInfo != null) {
-                            GlassButton(
-                                onClick = onNavigateToTransit,
-                                modifier = Modifier.weight(1f).testTag("view_transit_analysis_button")
-                            ) {
+                            GlassButton(onClick = onNavigateToTransit, modifier = Modifier.weight(1f).testTag("view_transit_analysis_button")) {
                                 Icon(Icons.Default.Train, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("駅・履歴解析", color = Color.White, fontWeight = FontWeight.Bold)
                             }
                         }
-
-                        GlassButtonSubtle(
-                            onClick = onNavigateToSpecs,
-                            modifier = Modifier.weight(1f).testTag("view_specs_analysis_button")
-                        ) {
+                        GlassButtonSubtle(onClick = onNavigateToSpecs, modifier = Modifier.weight(1f).testTag("view_specs_analysis_button")) {
                             Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("規格・ダンプ", fontWeight = FontWeight.Bold)
@@ -243,51 +156,24 @@ fun ScannerTab(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // デモカード読み込み
-        GlassPanel(
-            modifier = Modifier.fillMaxWidth(),
-            shape = GlassTokens.shape(GlassTokens.radiusLarge)
-        ) {
+        GlassPanel(modifier = Modifier.fillMaxWidth(), shape = GlassTokens.shape(GlassTokens.radiusLarge), tint = SaxWhite) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "テスト用デモデータ読み込み",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "エミュレータやカードが手元にない時でも、全機能をお試しいただけます",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
+                Text(text = "テスト用デモデータ読み込み", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                Text(text = "エミュレータやカードが手元にない時でも、全機能をお試しいただけます", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    GlassButton(
-                        onClick = onLoadSuicaDemo,
-                        modifier = Modifier.weight(1f).testTag("load_demo_suica_button")
-                    ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    GlassButton(onClick = onLoadSuicaDemo, modifier = Modifier.weight(1f).testTag("load_demo_suica_button")) {
                         Icon(Icons.Default.Train, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("Suica", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
-
-                    GlassButtonSubtle(
-                        onClick = onLoadMifareDemo,
-                        modifier = Modifier.weight(1f).testTag("load_demo_mifare_button")
-                    ) {
+                    GlassButtonSubtle(onClick = onLoadMifareDemo, modifier = Modifier.weight(1f).testTag("load_demo_mifare_button")) {
                         Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("MIFARE", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
-
-                    GlassButtonSubtle(
-                        onClick = onLoadNdefDemo,
-                        modifier = Modifier.weight(1f).testTag("load_demo_ndef_button")
-                    ) {
+                    GlassButtonSubtle(onClick = onLoadNdefDemo, modifier = Modifier.weight(1f).testTag("load_demo_ndef_button")) {
                         Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("NDEF", fontWeight = FontWeight.Bold, maxLines = 1)
@@ -297,38 +183,11 @@ fun ScannerTab(
         }
 
         Spacer(modifier = Modifier.height(18.dp))
-
-        Text(
-            text = "対応NFC規格・技術一覧",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+        Text(text = "対応NFC規格・技術一覧", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth())
         Spacer(modifier = Modifier.height(8.dp))
-
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            val supported = listOf(
-                "FeliCa (JIS 6319-4)",
-                "交通系IC (サイバネ規格)",
-                "NFC-A (ISO 14443-3A)",
-                "NFC-B (ISO 14443-3B)",
-                "NFC-V (ISO 15693)",
-                "ISO-DEP (ISO 14443-4)",
-                "NFC Forum NDEF (Type 1-5)",
-                "MIFARE Classic 1K/4K",
-                "MIFARE Ultralight / NTAG",
-                "楽天Edy / nanaco / WAON"
-            )
-            supported.forEach { item ->
-                SuggestionChip(
-                    onClick = {},
-                    label = { Text(item, style = MaterialTheme.typography.labelSmall) }
-                )
+        FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf("FeliCa (JIS 6319-4)", "交通系IC (サイバネ規格)", "NFC-A (ISO 14443-3A)", "NFC-B (ISO 14443-3B)", "NFC-V (ISO 15693)", "ISO-DEP (ISO 14443-4)", "NFC Forum NDEF", "MIFARE Classic 1K/4K", "MIFARE Ultralight").forEach { item ->
+                SuggestionChip(onClick = {}, label = { Text(item, style = MaterialTheme.typography.labelSmall) })
             }
         }
     }

@@ -105,13 +105,138 @@ fun HomeScreen(
         BoxWithConstraints(
             modifier = modifier
                 .fillMaxSize()
-                // 最背面に32dp微細グリッド＋環境光を描画 (透け感をハッキリ知覚させる！)
                 .glassBackdrop()
         ) {
             val isWideScreen = maxWidth >= 600.dp
 
+            // メイン画面 (常時マウント)
+            Scaffold(
+                containerColor = Color.Transparent,
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Row {
+                                Text(
+                                    text = "NFC Reader",
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.titleLarge.copy(shadow = captionGlow)
+                                )
+                                if (uiState.currentTag != null) {
+                                    Text(
+                                        text = " - ${uiState.currentTag?.standardLabel}",
+                                        fontWeight = FontWeight.Normal,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        },
+                        actions = {
+                            IconButton(
+                                onClick = { viewModel.openSettings() },
+                                modifier = Modifier.testTag("open_settings_button")
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Settings,
+                                    contentDescription = "設定",
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        },
+                        modifier = Modifier.glassChrome(
+                            tint = SaxBlue,
+                            alpha = GlassTokens.alphaChromeActive
+                        ),
+                        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+                    )
+                },
+                bottomBar = {
+                    if (!isWideScreen) {
+                        NavigationBar(
+                            modifier = Modifier.glassChrome(
+                                tint = SaxBlue,
+                                alpha = GlassTokens.alphaChromeBase
+                            ),
+                            containerColor = Color.Transparent
+                        ) {
+                            tabs.forEachIndexed { index, tab ->
+                                NavigationBarItem(
+                                    selected = uiState.selectedTab == index,
+                                    onClick = { viewModel.selectTab(index) },
+                                    icon = { Icon(tab.icon, contentDescription = tab.title) },
+                                    label = { Text(tab.title) },
+                                    colors = navItemColors,
+                                    modifier = Modifier.testTag(tab.testTag)
+                                )
+                            }
+                        }
+                    }
+                },
+                snackbarHost = { SnackbarHost(snackbarHostState) }
+            ) { innerPadding ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    if (isWideScreen) {
+                        NavigationRail(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .glassChrome(
+                                    tint = SaxBlue,
+                                    alpha = GlassTokens.alphaChromeBase
+                                ),
+                            containerColor = Color.Transparent
+                        ) {
+                            tabs.forEachIndexed { index, tab ->
+                                NavigationRailItem(
+                                    selected = uiState.selectedTab == index,
+                                    onClick = { viewModel.selectTab(index) },
+                                    icon = { Icon(tab.icon, contentDescription = tab.title) },
+                                    label = { Text(tab.title) },
+                                    colors = railItemColors,
+                                    modifier = Modifier.testTag(tab.testTag)
+                                )
+                            }
+                        }
+                    }
+
+                    Box(modifier = Modifier.weight(1f)) {
+                        when (uiState.selectedTab) {
+                            0 -> ScannerTab(
+                                state = uiState,
+                                onLoadSuicaDemo = { viewModel.loadDemoSuica() },
+                                onLoadMifareDemo = { viewModel.loadDemoMifare() },
+                                onLoadNdefDemo = { viewModel.loadDemoNdef() },
+                                onNavigateToTransit = { viewModel.selectTab(1) },
+                                onNavigateToSpecs = { viewModel.selectTab(2) }
+                            )
+                            1 -> TransitTab(
+                                tag = uiState.currentTag,
+                                onLoadSuicaDemo = { viewModel.loadDemoSuica() }
+                            )
+                            2 -> SpecsTab(
+                                tag = uiState.currentTag
+                            )
+                            3 -> BinaryTab(
+                                tag = uiState.currentTag,
+                                onLoadMifareDemo = { viewModel.loadDemoMifare() }
+                            )
+                            4 -> HistoryTab(
+                                historyList = historyList,
+                                onSelectTag = { viewModel.selectHistoryItem(it) },
+                                onDeleteItem = { viewModel.deleteHistoryItem(it) },
+                                onClearAll = { viewModel.clearAllHistory() }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // メイン画面の上に全画面オーバーレイとして設定画面を重ねる！
             if (uiState.isSettingsOpen) {
-                // 画面全体がHTML通りの大判ティントガラス板として開く！
                 SettingsScreen(
                     keys = customKeys,
                     inputError = keyInputError,
@@ -122,131 +247,6 @@ fun HomeScreen(
                     onClearInputError = { viewModel.clearKeyInputError() },
                     onClose = { viewModel.closeSettings() }
                 )
-            } else {
-                Scaffold(
-                    containerColor = Color.Transparent,
-                    topBar = {
-                        TopAppBar(
-                            title = {
-                                Row {
-                                    Text(
-                                        text = "NFC Reader",
-                                        fontWeight = FontWeight.Bold,
-                                        style = MaterialTheme.typography.titleLarge.copy(shadow = captionGlow)
-                                    )
-                                    if (uiState.currentTag != null) {
-                                        Text(
-                                            text = " - ${uiState.currentTag?.standardLabel}",
-                                            fontWeight = FontWeight.Normal,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            modifier = Modifier.padding(start = 8.dp, top = 4.dp),
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
-                            },
-                            actions = {
-                                IconButton(
-                                    onClick = { viewModel.openSettings() },
-                                    modifier = Modifier.testTag("open_settings_button")
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = "設定",
-                                        tint = MaterialTheme.colorScheme.onSurface
-                                    )
-                                }
-                            },
-                            modifier = Modifier.glassChrome(
-                                tint = SaxBlue,
-                                alpha = GlassTokens.alphaChromeActive
-                            ),
-                            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
-                        )
-                    },
-                    bottomBar = {
-                        if (!isWideScreen) {
-                            NavigationBar(
-                                modifier = Modifier.glassChrome(
-                                    tint = SaxBlue,
-                                    alpha = GlassTokens.alphaChromeBase
-                                ),
-                                containerColor = Color.Transparent
-                            ) {
-                                tabs.forEachIndexed { index, tab ->
-                                    NavigationBarItem(
-                                        selected = uiState.selectedTab == index,
-                                        onClick = { viewModel.selectTab(index) },
-                                        icon = { Icon(tab.icon, contentDescription = tab.title) },
-                                        label = { Text(tab.title) },
-                                        colors = navItemColors,
-                                        modifier = Modifier.testTag(tab.testTag)
-                                    )
-                                }
-                            }
-                        }
-                    },
-                    snackbarHost = { SnackbarHost(snackbarHostState) }
-                ) { innerPadding ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                    ) {
-                        if (isWideScreen) {
-                            NavigationRail(
-                                modifier = Modifier
-                                    .fillMaxHeight()
-                                    .glassChrome(
-                                        tint = SaxBlue,
-                                        alpha = GlassTokens.alphaChromeBase
-                                    ),
-                                containerColor = Color.Transparent
-                            ) {
-                                tabs.forEachIndexed { index, tab ->
-                                    NavigationRailItem(
-                                        selected = uiState.selectedTab == index,
-                                        onClick = { viewModel.selectTab(index) },
-                                        icon = { Icon(tab.icon, contentDescription = tab.title) },
-                                        label = { Text(tab.title) },
-                                        colors = railItemColors,
-                                        modifier = Modifier.testTag(tab.testTag)
-                                    )
-                                }
-                            }
-                        }
-
-                        Box(modifier = Modifier.weight(1f)) {
-                            when (uiState.selectedTab) {
-                                0 -> ScannerTab(
-                                    state = uiState,
-                                    onLoadSuicaDemo = { viewModel.loadDemoSuica() },
-                                    onLoadMifareDemo = { viewModel.loadDemoMifare() },
-                                    onLoadNdefDemo = { viewModel.loadDemoNdef() },
-                                    onNavigateToTransit = { viewModel.selectTab(1) },
-                                    onNavigateToSpecs = { viewModel.selectTab(2) }
-                                )
-                                1 -> TransitTab(
-                                    tag = uiState.currentTag,
-                                    onLoadSuicaDemo = { viewModel.loadDemoSuica() }
-                                )
-                                2 -> SpecsTab(
-                                    tag = uiState.currentTag
-                                )
-                                3 -> BinaryTab(
-                                    tag = uiState.currentTag,
-                                    onLoadMifareDemo = { viewModel.loadDemoMifare() }
-                                )
-                                4 -> HistoryTab(
-                                    historyList = historyList,
-                                    onSelectTag = { viewModel.selectHistoryItem(it) },
-                                    onDeleteItem = { viewModel.deleteHistoryItem(it) },
-                                    onClearAll = { viewModel.clearAllHistory() }
-                                )
-                            }
-                        }
-                    }
-                }
             }
         }
     }

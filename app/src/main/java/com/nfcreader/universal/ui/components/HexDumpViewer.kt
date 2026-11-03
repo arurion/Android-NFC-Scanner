@@ -46,6 +46,7 @@ import com.nfcreader.universal.model.MemoryBlock
 import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxWhite
 
 @Composable
 fun HexDumpViewer(
@@ -71,17 +72,11 @@ fun HexDumpViewer(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "メモリブロック一覧 (${blocks.size} ブロック)",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
+            Text(text = "メモリブロック一覧 (${blocks.size} ブロック)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
 
             GlassButtonSubtle(
                 onClick = {
@@ -92,11 +87,7 @@ fun HexDumpViewer(
                 },
                 modifier = Modifier.testTag("copy_hex_dump_button")
             ) {
-                Icon(
-                    imageVector = Icons.Default.ContentCopy,
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 4.dp).size(14.dp)
-                )
+                Icon(Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.padding(end = 4.dp).size(14.dp))
                 Text("全ダンプをコピー", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
             }
         }
@@ -104,23 +95,15 @@ fun HexDumpViewer(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 10.dp)
-                .testTag("search_hex_input"),
-            placeholder = { Text("Hexバイト、ASCII文字列、ブロック番号で検索...") },
+            modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp).testTag("search_hex_input"),
+            placeholder = { Text("Hexバイト、ASCII、ブロック番号で検索...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = "検索") },
             singleLine = true
         )
 
         if (filteredBlocks.isEmpty()) {
-            GlassPanel(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+            GlassPanel(modifier = Modifier.fillMaxWidth(), tint = SaxWhite) {
+                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text(
                         text = if (blocks.isEmpty()) "読み取り可能なメモリブロックがありません" else "検索条件に一致するブロックがありません",
                         style = MaterialTheme.typography.bodyMedium,
@@ -131,15 +114,14 @@ fun HexDumpViewer(
         } else {
             GlassPanel(
                 modifier = Modifier.fillMaxWidth().weight(1f),
+                tint = SaxWhite,
+                alpha = 0.46f,
                 shape = GlassTokens.shape(GlassTokens.radiusLarge)
             ) {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(filteredBlocks, key = { _, it -> it.index }) { idx, block ->
                         if (idx > 0) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                color = GlassTokens.edgeStroke
-                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 8.dp), color = GlassTokens.edgeStroke)
                         }
                         MemoryBlockRow(block = block)
                     }
@@ -152,10 +134,7 @@ fun HexDumpViewer(
 @Composable
 fun MemoryBlockRow(block: MemoryBlock) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 10.dp, vertical = 8.dp)
-            .testTag("memory_block_${block.index}")
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp).testTag("memory_block_${block.index}")
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -165,10 +144,7 @@ fun MemoryBlockRow(block: MemoryBlock) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                            shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                        )
+                        .background(SaxWhite.copy(alpha = 0.70f), RoundedCornerShape(GlassTokens.radiusSmall))
                         .padding(horizontal = 6.dp, vertical = 2.dp)
                 ) {
                     Text(
@@ -176,33 +152,20 @@ fun MemoryBlockRow(block: MemoryBlock) {
                         style = MaterialTheme.typography.labelSmall,
                         fontFamily = FontFamily.Monospace,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
 
                 if (block.description != null) {
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = block.description,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = block.description, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
 
             if (block.isProtected) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = "保護",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(end = 4.dp).size(14.dp)
-                    )
-                    Text(
-                        text = "保護",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                    Icon(Icons.Default.Lock, contentDescription = "保護", tint = MaterialTheme.colorScheme.error, modifier = Modifier.padding(end = 4.dp).size(14.dp))
+                    Text(text = "保護", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
                 }
             }
         }
@@ -210,39 +173,19 @@ fun MemoryBlockRow(block: MemoryBlock) {
         Spacer(modifier = Modifier.height(4.dp))
 
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState()),
+            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = block.hex,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                    letterSpacing = 0.5.sp
-                ),
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace, fontSize = 12.sp, letterSpacing = 0.5.sp),
                 color = if (block.isProtected) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary
             )
-
             Spacer(modifier = Modifier.width(16.dp))
-
             Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                    )
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                modifier = Modifier.background(SaxWhite.copy(alpha = 0.70f), RoundedCornerShape(GlassTokens.radiusSmall)).padding(horizontal = 6.dp, vertical = 2.dp)
             ) {
-                Text(
-                    text = block.ascii,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 12.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Text(text = block.ascii, style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace, fontSize = 12.sp))
             }
         }
     }

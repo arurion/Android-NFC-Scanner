@@ -27,6 +27,7 @@ import com.nfcreader.universal.ui.components.StationTimeline
 import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxWhite
 
 @Composable
 fun TransitTab(
@@ -34,56 +35,19 @@ fun TransitTab(
     onLoadSuicaDemo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    Box(modifier = modifier.fillMaxSize().padding(16.dp)) {
         if (tag?.transitCardInfo != null) {
             StationTimeline(transitInfo = tag.transitCardInfo)
         } else {
-            GlassPanel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center)
-                    .testTag("no_transit_card_card"),
-                shape = GlassTokens.shape(GlassTokens.radiusLarge)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Train,
-                        contentDescription = "Transit",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(54.dp)
-                    )
-
+            GlassPanel(modifier = Modifier.fillMaxWidth().align(Alignment.Center).testTag("no_transit_card_card"), shape = GlassTokens.shape(GlassTokens.radiusLarge), tint = SaxWhite) {
+                Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Icon(imageVector = Icons.Default.Train, contentDescription = "Transit", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(54.dp))
                     Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(
-                        text = "交通系ICカード未検出",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-
+                    Text(text = "交通系ICカード未検出", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Suica、PASMO、ICOCA、TOICA、manaca、SUGOCA等の交通系ICカードをスマートフォンの背面にかざしてください。\n乗降駅や利用履歴、現在残高を自動解析します。",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-
+                    Text(text = "Suica、PASMO等の交通系ICカードを背面にタッチしてください。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
                     Spacer(modifier = Modifier.height(20.dp))
-
-                    GlassButton(
-                        onClick = onLoadSuicaDemo,
-                        modifier = Modifier.testTag("transit_empty_load_demo_button")
-                    ) {
+                    GlassButton(onClick = onLoadSuicaDemo, modifier = Modifier.testTag("transit_empty_load_demo_button")) {
                         Text("Suica デモデータを読み込む", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }

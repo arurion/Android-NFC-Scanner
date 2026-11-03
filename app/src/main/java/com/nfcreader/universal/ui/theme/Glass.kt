@@ -14,10 +14,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
@@ -32,13 +35,17 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TileMode
 import androidx.compose.ui.graphics.asComposeRenderEffect
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 enum class GlassDrawMode(val label: String, val description: String) {
-    REAL_REFRACT("リアル屈折ガラス (AGSL / OSシェーダー)", "光の屈折と散乱をリアルタイム演算 (Android 13+推奨)"),
+    REAL_REFRACT("リアル屈折ガラス (AGSL / OSシェーダー)", "光の散乱と屈折をリアルタイム演算 (Android 13+推奨)"),
     STANDARD("標準ティントガラス (115°斜め光 + 透明ティント)", "斜め反射光帯とサックスブルーの透明感 (全端末対応)"),
     LITE("軽量・省電力モード", "エフェクトを最小限に抑えたバッテリー優先表示")
 }
@@ -53,9 +60,7 @@ object GlassTokens {
     const val alphaChromeActive = 0.52f
     const val alphaChromeInactive = 0.32f
     const val alphaChromeBase = 0.42f
-
     const val alphaContent = 0.46f
-    const val alphaContentSubtle = 0.30f
 
     val edgeStroke: Color = EdgeSilver.copy(alpha = 0.24f)
     val highlightColor: Color = Color.White.copy(alpha = 0.70f)
@@ -63,25 +68,24 @@ object GlassTokens {
 
     fun shape(radius: Dp = radiusMedium): Shape = RoundedCornerShape(radius)
 
-    // 115° 斜め反射光帯 (特許 US 7,412,663 由来: 全端末共通)
+    // CSSのカラーストップ比率に完全一致した115°反射光帯 (320px周期・40pxフェードイン/芯/フェードアウト)
     val diagonalHighlightBrush = Brush.linearGradient(
         0.0f to Color.Transparent,
-        0.20f to Color.Transparent,
-        0.32f to Color.White.copy(alpha = 0.16f),
-        0.42f to Color.White.copy(alpha = 0.28f),
-        0.52f to Color.White.copy(alpha = 0.16f),
-        0.65f to Color.Transparent,
+        (90f / 320f) to Color.Transparent,
+        (130f / 320f) to Color.White.copy(alpha = 0.22f),
+        (170f / 320f) to Color.White.copy(alpha = 0.22f),
+        (210f / 320f) to Color.Transparent,
         1.0f to Color.Transparent,
         start = Offset(0f, 0f),
-        end = Offset(450f, 950f)
+        end = Offset(290f, 135f),
+        tileMode = TileMode.Repeated
     )
 }
 
-// HTMLプロトタイプと完全同一の「32dp方眼グリッド＋環境放射光彩」を描画する背景モディファイア
+// 32dp微細方眼グリッド + 放射光彩背景 (透け感をハッキリ知覚させる最背面)
 fun Modifier.glassBackdrop(): Modifier = this
     .background(SurfaceBase)
     .drawBehind {
-        // 放射グラデーション
         drawRect(
             brush = Brush.radialGradient(
                 colors = listOf(Color(0xFFD8EAFC), Color.Transparent),
@@ -96,9 +100,8 @@ fun Modifier.glassBackdrop(): Modifier = this
                 radius = size.maxDimension * 0.7f
             )
         )
-        // 32dp の微細サックスブルー方眼グリッド (ガラスの透け感をハッキリ浮き彫りにする)
         val gridStep = 32.dp.toPx()
-        val gridColor = Color(136, 187, 255, 45) // rgba(136, 187, 255, 0.18)
+        val gridColor = Color(136, 187, 255, 45)
         var x = 0f
         while (x < size.width) {
             drawLine(gridColor, Offset(x, 0f), Offset(x, size.height), strokeWidth = 1f)
@@ -111,11 +114,9 @@ fun Modifier.glassBackdrop(): Modifier = this
         }
     }
 
-// AGSL 屈折シェーダー (Android 13+)
 private const val AGSL_REFRACT_SRC = """
     uniform shader content;
     uniform float2 resolution;
-
     half4 main(float2 coord) {
         float2 uv = coord / resolution;
         float dist = sin(uv.y * 30.0 + uv.x * 20.0) * 0.0035;
@@ -143,7 +144,7 @@ fun Modifier.glassChrome(
 fun GlassPanel(
     modifier: Modifier = Modifier,
     shape: Shape = GlassTokens.shape(GlassTokens.radiusMedium),
-    tint: Color = MaterialTheme.colorScheme.surface,
+    tint: Color = SaxWhite, // 白ベタを廃止しサックスホワイトを徹底
     alpha: Float = GlassTokens.alphaContent,
     elevated: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
@@ -195,9 +196,7 @@ fun GlassPanel(
     }
 }
 
-/**
- * SKILL準拠: プライマリ立体化ボタン (高さ44dp固定・不揃い禁止)
- */
+// プライマリ立体化ボタン (高さ44dp・角丸4dp固定・純白0.75fハイライト)
 @Composable
 fun GlassButton(
     onClick: () -> Unit,
@@ -211,17 +210,13 @@ fun GlassButton(
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.98f else 1.0f, label = "press_scale")
 
     val bgBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFF4B8FFA),
-            Color(0xFF2563EB),
-            Color(0xFF1D4ED8)
-        )
+        colors = listOf(Color(0xFF4B8FFA), Color(0xFF2563EB), Color(0xFF1D4ED8))
     )
 
     Box(
         modifier = modifier
             .scale(scale)
-            .height(44.dp) // 高さを44dpに厳格統一！
+            .height(44.dp)
             .shadow(
                 elevation = if (isPressed) 1.dp else 3.dp,
                 shape = shape,
@@ -234,7 +229,7 @@ fun GlassButton(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color.White.copy(alpha = if (isPressed) 0.30f else 0.80f),
+                        Color.White.copy(alpha = if (isPressed) 0.30f else 0.75f),
                         Color.Transparent
                     ),
                     endY = 2.5f
@@ -256,9 +251,7 @@ fun GlassButton(
     }
 }
 
-/**
- * SKILL準拠: サブ立体化ボタン (高さ38dp固定・不揃い禁止)
- */
+// サブ立体化ボタン (高さ38dp・角丸4dp固定)
 @Composable
 fun GlassButtonSubtle(
     onClick: () -> Unit,
@@ -272,16 +265,13 @@ fun GlassButtonSubtle(
     val scale by animateFloatAsState(targetValue = if (isPressed) 0.98f else 1.0f, label = "press_scale")
 
     val bgBrush = Brush.verticalGradient(
-        colors = listOf(
-            Color(0xFFFAFDFF),
-            Color(0xFFDCEBFF)
-        )
+        colors = listOf(Color(0xFFFAFDFF), Color(0xFFDCEBFF))
     )
 
     Box(
         modifier = modifier
             .scale(scale)
-            .height(38.dp) // 高さを38dpに厳格統一！
+            .height(38.dp)
             .shadow(
                 elevation = if (isPressed) 1.dp else 2.dp,
                 shape = shape,
@@ -309,6 +299,39 @@ fun GlassButtonSubtle(
         Row(
             verticalAlignment = Alignment.CenterVertically,
             content = content
+        )
+    }
+}
+
+// HTMLプロトタイプ準拠のカスタム入力欄 (.input-field)
+@Composable
+fun CustomGlassInputField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    placeholder: String = "",
+    textStyle: TextStyle = TextStyle(color = TextNavy, fontSize = 13.sp)
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .clip(RoundedCornerShape(GlassTokens.radiusSmall))
+            .background(SaxWhite.copy(alpha = 0.82f))
+            .border(1.dp, EdgeSilver.copy(alpha = 0.35f), RoundedCornerShape(GlassTokens.radiusSmall))
+            .padding(horizontal = 12.dp),
+        contentAlignment = Alignment.CenterStart
+    ) {
+        if (value.isEmpty() && placeholder.isNotEmpty()) {
+            Text(text = placeholder, color = TextNavyMuted.copy(alpha = 0.6f), fontSize = 13.sp)
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = textStyle,
+            cursorBrush = SolidColor(SaxBlueDeep),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }

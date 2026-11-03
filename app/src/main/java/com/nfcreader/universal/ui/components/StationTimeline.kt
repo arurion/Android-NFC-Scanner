@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -56,12 +55,12 @@ import com.nfcreader.universal.data.StationDatabase
 import com.nfcreader.universal.model.StationInfo
 import com.nfcreader.universal.model.TransitCardInfo
 import com.nfcreader.universal.model.TransitTransaction
-import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.SaxBlueDeep
+import com.nfcreader.universal.ui.theme.SaxWhite
 import com.nfcreader.universal.ui.theme.StatusAmber
 import com.nfcreader.universal.ui.theme.StatusGreen
 import com.nfcreader.universal.ui.theme.StatusPurple
@@ -79,13 +78,13 @@ fun StationTimeline(
     var showStationDictSheet by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // サマリーパネル (カード乱立をやめ1つの統合枠へ)
         GlassPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
                 .testTag("transit_card_hero"),
-            shape = GlassTokens.shape(GlassTokens.radiusLarge),
+            tint = SaxWhite,
+            alpha = 0.46f,
             elevated = true
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
@@ -180,7 +179,6 @@ fun StationTimeline(
             }
         }
 
-        // セクションヘッダー + ぷっくり立体ボタン
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -198,11 +196,7 @@ fun StationTimeline(
                 onClick = { showStationDictSheet = true },
                 modifier = Modifier.testTag("open_station_dictionary_button")
             ) {
-                Icon(
-                    imageVector = Icons.Default.Search,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp)
-                )
+                Icon(Icons.Default.Search, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "全国駅辞書 (${StationDatabase.getLoadedStationCount()}駅)",
@@ -213,13 +207,8 @@ fun StationTimeline(
         }
 
         if (transitInfo.transactions.isEmpty()) {
-            GlassPanel(modifier = Modifier.fillMaxWidth()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+            GlassPanel(modifier = Modifier.fillMaxWidth(), tint = SaxWhite) {
+                Box(modifier = Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text(
                         text = "このカードには利用履歴が記録されていないか、暗号化領域です",
                         style = MaterialTheme.typography.bodyMedium,
@@ -228,18 +217,16 @@ fun StationTimeline(
                 }
             }
         } else {
-            // アンチ・Bento Grid: 連続データ行
             GlassPanel(
                 modifier = Modifier.fillMaxWidth(),
+                tint = SaxWhite,
+                alpha = 0.46f,
                 shape = GlassTokens.shape(GlassTokens.radiusLarge)
             ) {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(transitInfo.transactions, key = { _, tx -> "${tx.id}_${tx.seqNumber}" }) { idx, tx ->
                         if (idx > 0) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 14.dp),
-                                color = GlassTokens.edgeStroke
-                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 14.dp), color = GlassTokens.edgeStroke)
                         }
                         TransitTransactionRow(tx = tx, formatter = formatter)
                     }
@@ -275,7 +262,6 @@ fun TransitTransactionRow(
         else -> SaxBlueDeep
     }
 
-    // 乗車区間移動 (両方の駅が明確に存在する場合のみ)
     val isTrainRide = !tx.isShopping && !tx.isBus && !tx.isCharge &&
             !tx.entryStationName.isNullOrBlank() && !tx.exitStationName.isNullOrBlank()
 
@@ -291,64 +277,34 @@ fun TransitTransactionRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.weight(1f),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .background(iconColor.copy(alpha = 0.16f), CircleShape),
+                    modifier = Modifier.size(34.dp).background(iconColor.copy(alpha = 0.16f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = tx.processType,
-                        tint = iconColor,
-                        modifier = Modifier.size(18.dp)
-                    )
+                    Icon(imageVector = icon, contentDescription = tx.processType, tint = iconColor, modifier = Modifier.size(18.dp))
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
 
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = tx.processType,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = tx.processType, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = tx.terminalType,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = tx.terminalType, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = tx.dateString,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = tx.dateString, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         if (tx.timeString != null) {
-                            Text(
-                                text = " ${tx.timeString}",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Text(text = " ${tx.timeString}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
             }
 
             Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = formatter.format(tx.balance),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = formatter.format(tx.balance), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 if (tx.amountChanged != null) {
                     val isPositive = tx.amountChanged > 0
                     Text(
@@ -361,53 +317,29 @@ fun TransitTransactionRow(
             }
         }
 
-        // --- 文脈に応じた駅表示 (乗車移動のみ矢印！チャージや入場は単一駅表示) ---
+        // 乗車移動のみ矢印表示！物販・チャージ・入場は単一駅/店舗表示
         if (isTrainRide) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
-                        shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                    )
+                    .background(SaxWhite.copy(alpha = 0.65f), RoundedCornerShape(GlassTokens.radiusSmall))
                     .padding(horizontal = 10.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = tx.entryStationName!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = tx.entryStationName!!, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     if (tx.entryLineName != null) {
-                        Text(
-                            text = tx.entryLineName,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = tx.entryLineName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
 
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "to",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(horizontal = 8.dp).size(16.dp)
-                )
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "to", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp).size(16.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = tx.exitStationName!!,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = tx.exitStationName!!, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
                     if (tx.exitLineName != null) {
-                        Text(
-                            text = tx.exitLineName,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = tx.exitLineName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -419,19 +351,11 @@ fun TransitTransactionRow(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(
-                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                            shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                        )
+                        .background(SaxWhite.copy(alpha = 0.50f), RoundedCornerShape(GlassTokens.radiusSmall))
                         .padding(horizontal = 10.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(14.dp)
-                    )
+                    Icon(Icons.Default.Place, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
                         text = if (tx.isCharge) "チャージ取扱: $stationLabel" else "利用場所: $stationLabel",
@@ -440,11 +364,7 @@ fun TransitTransactionRow(
                     )
                     if (lineLabel != null) {
                         Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "($lineLabel)",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = "($lineLabel)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
@@ -453,24 +373,13 @@ fun TransitTransactionRow(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                    )
+                    .background(SaxWhite.copy(alpha = 0.50f), RoundedCornerShape(GlassTokens.radiusSmall))
                     .padding(horizontal = 10.dp, vertical = 5.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.DirectionsBus,
-                    contentDescription = null,
-                    tint = StatusPurple,
-                    modifier = Modifier.size(14.dp)
-                )
+                Icon(Icons.Default.DirectionsBus, contentDescription = null, tint = StatusPurple, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = "${tx.entryLineName} / ${tx.entryStationName ?: "停留所"}",
-                    style = MaterialTheme.typography.bodySmall
-                )
+                Text(text = "${tx.entryLineName} / ${tx.entryStationName ?: "停留所"}", style = MaterialTheme.typography.bodySmall)
             }
         }
 
@@ -479,24 +388,10 @@ fun TransitTransactionRow(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "連番 #%d".format(tx.seqNumber),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
+            Text(text = "連番 #%d".format(tx.seqNumber), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = if (isExpanded) "生データ非表示" else "16byte 生データ",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Icon(
-                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
-                )
+                Text(text = if (isExpanded) "生データ非表示" else "16byte 生データ", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Icon(imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
             }
         }
 
@@ -505,19 +400,12 @@ fun TransitTransactionRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
-                        shape = RoundedCornerShape(GlassTokens.radiusSmall)
-                    )
+                    .background(SaxWhite.copy(alpha = 0.70f), RoundedCornerShape(GlassTokens.radiusSmall))
                     .padding(8.dp)
             ) {
                 Text(
                     text = tx.rawHex,
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontSize = 11.sp,
-                        letterSpacing = 0.5.sp
-                    ),
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp, letterSpacing = 0.5.sp),
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -530,66 +418,32 @@ fun TransitTransactionRow(
 fun StationDictionarySheet(onDismiss: () -> Unit) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var query by remember { mutableStateOf("") }
-
-    val results = remember(query) {
-        StationDatabase.searchStations(query, limit = 50)
-    }
+    val results = remember(query) { StationDatabase.searchStations(query, limit = 50) }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "全国サイバネ駅コード辞書",
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "約6,000駅の線区コード・駅順コードを収録しています",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
+        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Text(text = "全国サイバネ駅コード辞書", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(text = "約6,000駅の線区コード・駅順コードを収録しています", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(12.dp))
-
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("station_dict_search_input"),
-                placeholder = { Text("駅名、路線名、会社名 (例: 新宿, 山手)...") },
+                modifier = Modifier.fillMaxWidth().testTag("station_dict_search_input"),
+                placeholder = { Text("駅名、路線名、会社名...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true
             )
-
             Spacer(modifier = Modifier.height(10.dp))
-
-            Text(
-                text = "検索結果: ${results.size}件",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
+            Text(text = "検索結果: ${results.size}件", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             Spacer(modifier = Modifier.height(6.dp))
-
-            GlassPanel(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(380.dp)
-            ) {
+            GlassPanel(modifier = Modifier.fillMaxWidth().height(380.dp), tint = SaxWhite) {
                 LazyColumn(modifier = Modifier.fillMaxWidth()) {
                     itemsIndexed(results) { idx, item ->
                         if (idx > 0) {
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 10.dp),
-                                color = GlassTokens.edgeStroke
-                            )
+                            HorizontalDivider(modifier = Modifier.padding(horizontal = 10.dp), color = GlassTokens.edgeStroke)
                         }
                         StationDictItemRow(item = item)
                     }
@@ -602,52 +456,26 @@ fun StationDictionarySheet(onDismiss: () -> Unit) {
 @Composable
 fun StationDictItemRow(item: StationInfo) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = item.stationName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text(text = item.stationName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(6.dp))
                 Surface(
                     shape = RoundedCornerShape(GlassTokens.radiusSmall),
                     color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                 ) {
-                    Text(
-                        text = item.companyName,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp)
-                    )
+                    Text(text = item.companyName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp))
                 }
             }
-            Text(
-                text = item.lineName,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(text = item.lineName, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-
         Column(horizontalAlignment = Alignment.End) {
-            Text(
-                text = "線 [0x%02X]".format(item.lineCode),
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = "駅 [0x%02X]".format(item.stationCode),
-                style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            Text(text = "線 [0x%02X]".format(item.lineCode), style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
+            Text(text = "駅 [0x%02X]".format(item.stationCode), style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.secondary)
         }
     }
 }

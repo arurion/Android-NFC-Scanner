@@ -33,6 +33,7 @@ import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxWhite
 
 @Composable
 fun BinaryTab(
@@ -43,42 +44,16 @@ fun BinaryTab(
     val context = LocalContext.current
 
     if (tag == null || tag.memoryBlocks.isEmpty()) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            GlassPanel(
-                shape = GlassTokens.shape(GlassTokens.radiusLarge)
-            ) {
-                Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DataObject,
-                        contentDescription = null,
-                        modifier = Modifier.size(54.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+        Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            GlassPanel(shape = GlassTokens.shape(GlassTokens.radiusLarge), tint = SaxWhite) {
+                Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(imageVector = Icons.Default.DataObject, contentDescription = null, modifier = Modifier.size(54.dp), tint = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "バイナリメモリブロック未取得",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Text(text = "バイナリメモリブロック未取得", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "現在選択中のタグには読み取り可能なメモリブロックがないか、暗号化キーによるアクセス保護が適用されています。",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = "現在選択中のタグには読み取り可能なメモリブロックがないか、暗号化キーによるアクセス保護が適用されています。", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     Spacer(modifier = Modifier.height(20.dp))
-                    GlassButton(
-                        onClick = onLoadMifareDemo,
-                        modifier = Modifier.testTag("load_mifare_demo_from_binary_button")
-                    ) {
+                    GlassButton(onClick = onLoadMifareDemo, modifier = Modifier.testTag("load_mifare_demo_from_binary_button")) {
                         Text("MIFARE Classic デモを読み込む", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
@@ -87,35 +62,12 @@ fun BinaryTab(
         return
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        GlassPanel(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
+        GlassPanel(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp), tint = SaxWhite) {
+            Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text(
-                        text = "UID: ${tag.idHex}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${tag.standardLabel} | ${tag.memoryBlocks.size} ブロック",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Text(text = "UID: ${tag.idHex}", style = MaterialTheme.typography.titleSmall, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
+                    Text(text = "${tag.standardLabel} | ${tag.memoryBlocks.size} ブロック", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
 
                 GlassButtonSubtle(
@@ -136,10 +88,6 @@ fun BinaryTab(
             }
         }
 
-        HexDumpViewer(
-            blocks = tag.memoryBlocks,
-            fullDumpText = tag.allHexDump,
-            modifier = Modifier.weight(1f)
-        )
+        HexDumpViewer(blocks = tag.memoryBlocks, fullDumpText = tag.allHexDump, modifier = Modifier.weight(1f))
     }
 }
