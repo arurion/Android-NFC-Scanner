@@ -9,23 +9,24 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Train
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.model.NfcTagData
 import com.nfcreader.universal.ui.components.StationTimeline
+import com.nfcreader.universal.ui.theme.GlassButton
+import com.nfcreader.universal.ui.theme.GlassPanel
+import com.nfcreader.universal.ui.theme.GlassTokens
 
 @Composable
 fun TransitTab(
@@ -46,7 +47,7 @@ fun TransitTab(
                     .fillMaxWidth()
                     .align(Alignment.Center)
                     .testTag("no_transit_card_card"),
-                shape = RoundedCornerShape(16.dp),
+                shape = GlassTokens.shape(GlassTokens.radiusLarge)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -79,11 +80,11 @@ fun TransitTab(
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Button(
+                    GlassButton(
                         onClick = onLoadSuicaDemo,
                         modifier = Modifier.testTag("transit_empty_load_demo_button")
                     ) {
-                        Text("Suica デモデータを読み込む")
+                        Text("Suica デモデータを読み込む", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }

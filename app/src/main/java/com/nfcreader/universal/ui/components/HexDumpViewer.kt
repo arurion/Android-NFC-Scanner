@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nfcreader.universal.model.MemoryBlock
+import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 
@@ -83,7 +84,7 @@ fun HexDumpViewer(
                 fontWeight = FontWeight.Bold
             )
 
-            FilledTonalButton(
+            GlassButton(
                 onClick = {
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     val clip = ClipData.newPlainText("NFC Hex Dump", fullDumpText)
@@ -95,9 +96,10 @@ fun HexDumpViewer(
                 Icon(
                     imageVector = Icons.Default.ContentCopy,
                     contentDescription = null,
-                    modifier = Modifier.padding(end = 4.dp).size(16.dp)
+                    tint = Color.White,
+                    modifier = Modifier.padding(end = 4.dp).size(15.dp)
                 )
-                Text("全ダンプをコピー", style = MaterialTheme.typography.labelSmall)
+                Text("全ダンプをコピー", style = MaterialTheme.typography.labelSmall, color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
 
@@ -166,7 +168,7 @@ fun MemoryBlockRow(block: MemoryBlock) {
                 Box(
                     modifier = Modifier
                         .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f),
                             shape = RoundedCornerShape(GlassTokens.radiusSmall)
                         )
                         .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -230,7 +232,7 @@ fun MemoryBlockRow(block: MemoryBlock) {
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        color = Color.White.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(GlassTokens.radiusSmall)
                     )
                     .padding(horizontal = 6.dp, vertical = 2.dp)

@@ -25,8 +25,6 @@ import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -36,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -45,8 +44,10 @@ import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.ui.NfcHardwareState
 import com.nfcreader.universal.ui.NfcUiState
 import com.nfcreader.universal.ui.components.NfcRadarAnimation
+import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.StatusRose
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -77,7 +78,7 @@ fun ScannerTab(
                     .padding(bottom = 16.dp)
                     .testTag("hardware_warning_card"),
                 tint = if (state.hardwareState == NfcHardwareState.DISABLED)
-                    StatusRose
+                    StatusRose.copy(alpha = 0.5f)
                 else
                     MaterialTheme.colorScheme.surfaceVariant
             ) {
@@ -102,7 +103,7 @@ fun ScannerTab(
                             text = if (state.hardwareState == NfcHardwareState.DISABLED)
                                 "端末の設定からNFCをONにしてください。"
                             else
-                                "物理NFCがない環境でも、下の「テスト用デモデータ」ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
+                                "物理NFCがない環境でも、下の「デモデータ」ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -161,6 +162,7 @@ fun ScannerTab(
                     .fillMaxWidth()
                     .testTag("scanned_tag_summary_card"),
                 shape = GlassTokens.shape(GlassTokens.radiusLarge),
+                tint = SaxBlue.copy(alpha = 0.45f),
                 elevated = true
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -171,13 +173,13 @@ fun ScannerTab(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            color = Color.White.copy(alpha = 0.45f)
                         ) {
                             Text(
                                 text = "検出中のカード",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
@@ -211,34 +213,30 @@ fun ScannerTab(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         if (tag.transitCardInfo != null) {
-                            Button(
+                            GlassButton(
                                 onClick = onNavigateToTransit,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .testTag("view_transit_analysis_button")
+                                modifier = Modifier.weight(1f).testTag("view_transit_analysis_button")
                             ) {
-                                Icon(Icons.Default.Train, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Default.Train, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("駅・履歴解析")
+                                Text("駅・履歴解析", color = Color.White, fontWeight = FontWeight.Bold)
                             }
                         }
 
-                        FilledTonalButton(
+                        GlassButton(
                             onClick = onNavigateToSpecs,
-                            modifier = Modifier
-                                .weight(1f)
-                                .testTag("view_specs_analysis_button")
+                            modifier = Modifier.weight(1f).testTag("view_specs_analysis_button")
                         ) {
-                            Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Layers, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("規格・ダンプ")
+                            Text("規格・ダンプ", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -246,6 +244,7 @@ fun ScannerTab(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
+        // デモカード読み込みエリア
         GlassPanel(
             modifier = Modifier.fillMaxWidth(),
             shape = GlassTokens.shape(GlassTokens.radiusLarge)
@@ -268,37 +267,31 @@ fun ScannerTab(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    FilledTonalButton(
+                    GlassButton(
                         onClick = onLoadSuicaDemo,
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("load_demo_suica_button")
+                        modifier = Modifier.weight(1f).testTag("load_demo_suica_button")
                     ) {
-                        Icon(Icons.Default.Train, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Train, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Suica", maxLines = 1)
+                        Text("Suica", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
 
-                    FilledTonalButton(
+                    GlassButton(
                         onClick = onLoadMifareDemo,
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("load_demo_mifare_button")
+                        modifier = Modifier.weight(1f).testTag("load_demo_mifare_button")
                     ) {
-                        Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.CreditCard, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("MIFARE", maxLines = 1)
+                        Text("MIFARE", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
 
-                    FilledTonalButton(
+                    GlassButton(
                         onClick = onLoadNdefDemo,
-                        modifier = Modifier
-                            .weight(1f)
-                            .testTag("load_demo_ndef_button")
+                        modifier = Modifier.weight(1f).testTag("load_demo_ndef_button")
                     ) {
-                        Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(Icons.Default.Link, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("NDEF", maxLines = 1)
+                        Text("NDEF", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }

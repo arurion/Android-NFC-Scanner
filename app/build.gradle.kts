@@ -13,8 +13,8 @@ android {
     applicationId = "com.nfcreader.universal"
     minSdk = 24
     targetSdk = 34
-    versionCode = 3
-    versionName = "neko-chan-1.1.1"
+    versionCode = 4
+    versionName = "neko-chan-1.1.2"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

@@ -1,7 +1,6 @@
 package com.nfcreader.universal.ui.screens
 
 import android.os.Build
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,13 +16,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.VpnKey
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -49,9 +48,11 @@ import com.nfcreader.universal.data.HexUtils
 import com.nfcreader.universal.data.StationDatabase
 import com.nfcreader.universal.data.db.CustomKeyEntity
 import com.nfcreader.universal.ui.KeyInputError
+import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassDrawMode
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
+import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.SaxBlueDeep
 import com.nfcreader.universal.ui.theme.StatusRose
 
@@ -74,208 +75,248 @@ fun SettingsSheet(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = Color.Transparent,
+        dragHandle = null
     ) {
-        LazyColumn(
+        // シート全体を美しい半透明ティントガラスで包む
+        GlassPanel(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 12.dp, bottomEnd = 12.dp),
+            tint = SaxBlue.copy(alpha = 0.52f),
+            elevated = true
         ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = SaxBlueDeep,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "設定・機能管理",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            // 1. ガラス描画エフェクト設定 (AGSL / 斜め光 / 省電力)
-            item {
-                GlassPanel(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Settings, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(24.dp))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "ティントガラス描画設定",
-                                style = MaterialTheme.typography.titleMedium,
+                                text = "設定 & 暗号鍵マネージャー",
+                                style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold
                             )
                         }
 
-                        Text(
-                            text = "お使いの端末環境: Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        GlassDrawMode.values().forEach { mode ->
-                            val isSelected = mode == currentGlassMode
-                            val isSupported = mode != GlassDrawMode.REAL_REFRACT || Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
-
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable(enabled = isSupported) { onGlassModeChange(mode) }
-                                    .padding(vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
-                                    contentDescription = null,
-                                    tint = if (isSelected) SaxBlueDeep else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Column {
-                                    Text(
-                                        text = mode.label,
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isSupported) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                                    )
-                                    Text(
-                                        text = if (isSupported) mode.description else "※Android 13 (API 33) 以上の端末で利用可能です",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
+                        GlassButton(onClick = onDismiss) {
+                            Text("完了", color = Color.White, fontWeight = FontWeight.Bold)
                         }
                     }
                 }
-            }
 
-            // 2. MIFARE Classic 任意鍵管理
-            item {
-                GlassPanel(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.VpnKey, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "MIFARE Classic 認証鍵の登録",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        Text(
-                            text = "ご自身で把握されているセクタ認証鍵（Key A / B）を登録すると、スキャン時に既定鍵と合わせて自動試行されます（鍵の推測・総当たりは行いません）。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        OutlinedTextField(
-                            value = label,
-                            onValueChange = { label = it },
-                            modifier = Modifier.fillMaxWidth().testTag("key_label_input"),
-                            label = { Text("ラベル（例: 自宅の合鍵タグ）") },
-                            singleLine = true
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        OutlinedTextField(
-                            value = hexInput,
-                            onValueChange = {
-                                hexInput = it
-                                if (inputError != null) onClearInputError()
-                            },
-                            modifier = Modifier.fillMaxWidth().testTag("key_hex_input"),
-                            label = { Text("鍵（16進数 12桁 / 6バイト）") },
-                            placeholder = { Text("例: FFFFFFFFFFFF") },
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = FontFamily.Monospace),
-                            singleLine = true,
-                            isError = inputError != null,
-                            supportingText = {
-                                val message = when (inputError) {
-                                    KeyInputError.InvalidLength -> "鍵は16進数12桁が必要です（現在 $normalizedLength 桁）。"
-                                    KeyInputError.InvalidChars -> "0-9, A-F の16進文字を入力してください。"
-                                    null -> "区切り記号（: や -）は自動的に無視されます。"
-                                }
-                                Text(message)
+                // 1. 【登録済みの暗号鍵一覧・管理】(探しやすいよう最上部にしっかり配置！)
+                item {
+                    GlassPanel(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = GlassTokens.shape(GlassTokens.radiusLarge),
+                        tint = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.Key, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "登録済み MIFARE 鍵一覧 (${keys.size}件)",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
-                        )
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                            Text(
+                                text = "登録された鍵はスキャン時に既定鍵と合わせて自動試行されます。",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
 
-                        Button(
-                            onClick = {
-                                val success = onAddKey(label, hexInput)
-                                if (success) {
-                                    label = ""
-                                    hexInput = ""
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            if (keys.isEmpty()) {
+                                Surface(
+                                    shape = RoundedCornerShape(GlassTokens.radiusSmall),
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(
+                                        text = "登録済みのカスタム鍵はありません（下のフォームから追加できます）",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(12.dp)
+                                    )
                                 }
-                            },
-                            modifier = Modifier.fillMaxWidth().testTag("add_custom_key_button")
-                        ) {
-                            Text("鍵を登録する")
-                        }
+                            } else {
+                                keys.forEachIndexed { idx, key ->
+                                    if (idx > 0) {
+                                        HorizontalDivider(
+                                            modifier = Modifier.padding(vertical = 6.dp),
+                                            color = GlassTokens.edgeStroke
+                                        )
+                                    }
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(key.label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                            Text(
+                                                text = key.keyHex,
+                                                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                                                color = SaxBlueDeep,
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        }
+                                        IconButton(onClick = { onDeleteKey(key) }) {
+                                            Icon(Icons.Default.Delete, contentDescription = "削除", tint = StatusRose, modifier = Modifier.size(20.dp))
+                                        }
+                                    }
+                                }
+                            }
 
-                        if (keys.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(14.dp))
                             HorizontalDivider(color = GlassTokens.edgeStroke)
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "登録済みの鍵 (${keys.size}件)",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold
-                            )
+
+                            // 鍵追加フォーム
+                            Text("新しい鍵を登録", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            keys.forEach { key ->
+                            OutlinedTextField(
+                                value = label,
+                                onValueChange = { label = it },
+                                modifier = Modifier.fillMaxWidth().testTag("key_label_input"),
+                                label = { Text("ラベル（例: 自宅の合鍵タグ）") },
+                                singleLine = true
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            OutlinedTextField(
+                                value = hexInput,
+                                onValueChange = {
+                                    hexInput = it
+                                    if (inputError != null) onClearInputError()
+                                },
+                                modifier = Modifier.fillMaxWidth().testTag("key_hex_input"),
+                                label = { Text("鍵（16進数 12桁 / 6バイト）") },
+                                placeholder = { Text("例: FFFFFFFFFFFF") },
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                                singleLine = true,
+                                isError = inputError != null,
+                                supportingText = {
+                                    val msg = when (inputError) {
+                                        KeyInputError.InvalidLength -> "16進数12桁が必要です（現在 $normalizedLength 桁）。"
+                                        KeyInputError.InvalidChars -> "0-9, A-F の文字を入力してください。"
+                                        null -> "区切り記号（: や -）は自動的に無視されます。"
+                                    }
+                                    Text(msg)
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            GlassButton(
+                                onClick = {
+                                    val ok = onAddKey(label, hexInput)
+                                    if (ok) {
+                                        label = ""
+                                        hexInput = ""
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth().testTag("add_custom_key_button")
+                            ) {
+                                Icon(Icons.Default.VpnKey, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text("この鍵を登録する", color = Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+
+                // 2. 【ティントガラス描画設定】
+                item {
+                    GlassPanel(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = GlassTokens.shape(GlassTokens.radiusLarge),
+                        tint = MaterialTheme.colorScheme.surface.copy(alpha = 0.65f)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("ティントガラス描画エフェクト", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                            }
+
+                            Text(
+                                text = "端末環境: Android ${Build.VERSION.RELEASE} (API ${Build.VERSION.SDK_INT})",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            GlassDrawMode.values().forEach { mode ->
+                                val isSelected = mode == currentGlassMode
+                                val isSupported = mode != GlassDrawMode.REAL_REFRACT || Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
+                                        .clickable(enabled = isSupported) { onGlassModeChange(mode) }
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(key.label, style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-                                        Text(key.keyHex, style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace), color = SaxBlueDeep)
-                                    }
-                                    IconButton(onClick = { onDeleteKey(key) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "削除", tint = StatusRose, modifier = Modifier.size(18.dp))
+                                    Icon(
+                                        imageVector = if (isSelected) Icons.Default.RadioButtonChecked else Icons.Default.RadioButtonUnchecked,
+                                        contentDescription = null,
+                                        tint = if (isSelected) SaxBlueDeep else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Column {
+                                        Text(
+                                            text = mode.label,
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                            color = if (isSupported) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.45f)
+                                        )
+                                        Text(
+                                            text = if (isSupported) mode.description else "※Android 13 (API 33) 以上で利用可能",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            // 3. データベース統計情報
-            item {
-                GlassPanel(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Default.Storage, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Column {
-                            Text("全国駅名辞書データベース", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                            Text("収録駅数: 約${StationDatabase.getLoadedStationCount()}駅 (サイバネ規格 0x0003 準拠)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                // 3. 【駅名辞書情報】
+                item {
+                    GlassPanel(modifier = Modifier.fillMaxWidth()) {
+                        Row(modifier = Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.Storage, contentDescription = null, tint = SaxBlueDeep, modifier = Modifier.size(20.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text("全国駅名辞書データベース", style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                Text("約${StationDatabase.getLoadedStationCount()}駅 収録 (サイバネ規格 0x0003 準拠)", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }

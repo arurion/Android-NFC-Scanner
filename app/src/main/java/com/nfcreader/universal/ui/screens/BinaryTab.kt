@@ -15,14 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -30,6 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.model.NfcTagData
 import com.nfcreader.universal.ui.components.HexDumpViewer
+import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 
@@ -74,11 +74,11 @@ fun BinaryTab(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(20.dp))
-                    Button(
+                    GlassButton(
                         onClick = onLoadMifareDemo,
                         modifier = Modifier.testTag("load_mifare_demo_from_binary_button")
                     ) {
-                        Text("MIFARE Classic デモを読み込む")
+                        Text("MIFARE Classic デモを読み込む", color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -117,7 +117,7 @@ fun BinaryTab(
                     )
                 }
 
-                FilledTonalButton(
+                GlassButton(
                     onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -128,9 +128,9 @@ fun BinaryTab(
                     },
                     modifier = Modifier.testTag("share_hex_dump_button")
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("共有")
+                    Text("共有", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }

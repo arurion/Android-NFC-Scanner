@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -37,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nfcreader.universal.model.NdefParsedRecord
 import com.nfcreader.universal.model.NfcTagData
+import com.nfcreader.universal.ui.theme.GlassButton
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 
@@ -150,7 +151,7 @@ fun SpecsTab(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                            color = MaterialTheme.colorScheme.primaryContainer
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                         ) {
                             Text(
                                 text = tag.standardLabel,
@@ -293,7 +294,7 @@ fun NdefRecordRow(record: NdefParsedRecord) {
             Box(
                 modifier = Modifier
                     .background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(GlassTokens.radiusSmall)
                     )
                     .padding(horizontal = 6.dp, vertical = 2.dp)
@@ -331,7 +332,7 @@ fun NdefRecordRow(record: NdefParsedRecord) {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            FilledTonalButton(
+            GlassButton(
                 onClick = {
                     try {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(record.uri))
@@ -342,9 +343,9 @@ fun NdefRecordRow(record: NdefParsedRecord) {
                 },
                 modifier = Modifier.testTag("open_ndef_uri_button_${record.index}")
             ) {
-                Icon(Icons.Default.OpenInBrowser, contentDescription = null, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.OpenInBrowser, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("ブラウザで開く", style = MaterialTheme.typography.labelSmall)
+                Text("ブラウザで開く", color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
 
