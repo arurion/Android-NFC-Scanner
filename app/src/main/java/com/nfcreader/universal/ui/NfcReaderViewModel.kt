@@ -13,6 +13,7 @@ import com.nfcreader.universal.data.db.AppDatabase
 import com.nfcreader.universal.data.db.CustomKeyEntity
 import com.nfcreader.universal.data.db.TagScanEntity
 import com.nfcreader.universal.model.NfcTagData
+import com.nfcreader.universal.ui.theme.GlassDrawMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -30,10 +31,12 @@ data class NfcUiState(
     val hardwareState: NfcHardwareState = NfcHardwareState.AVAILABLE_AND_ENABLED,
     val isScanning: Boolean = true,
     val currentTag: NfcTagData? = null,
-    val selectedTab: Int = 0, // 0: Scanner, 1: Transit, 2: Specs, 3: Binary Dump, 4: History, 5: Keys
+    val selectedTab: Int = 0, // 0: Scanner, 1: Transit, 2: Specs, 3: Binary Dump, 4: History
     val isLoading: Boolean = false,
     val statusMessage: String = "スマートフォン背面にNFCカードをかざしてください",
-    val errorBanner: String? = null
+    val errorBanner: String? = null,
+    val isSettingsOpen: Boolean = false,
+    val glassDrawMode: GlassDrawMode = GlassDrawMode.STANDARD
 )
 
 sealed class KeyInputError {
@@ -71,6 +74,10 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
             )
         }
     }
+
+    fun openSettings() { _uiState.value = _uiState.value.copy(isSettingsOpen = true) }
+    fun closeSettings() { _uiState.value = _uiState.value.copy(isSettingsOpen = false) }
+    fun setGlassDrawMode(mode: GlassDrawMode) { _uiState.value = _uiState.value.copy(glassDrawMode = mode) }
 
     fun updateNfcStatus(adapter: NfcAdapter?) {
         val hw = when {

@@ -13,14 +13,12 @@ android {
     applicationId = "com.nfcreader.universal"
     minSdk = 24
     targetSdk = 34
-    versionCode = 2
-    versionName = "neko-chan-1.1"
+    versionCode = 3
+    versionName = "neko-chan-1.1.1"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  // Release signing: used only when all four values are provided (env vars or Gradle
-  // properties). Otherwise the release build falls back to the debug key.
   fun releaseProp(name: String): String? =
     System.getenv(name) ?: (project.findProperty(name) as String?)
   val relStoreFile = releaseProp("RELEASE_STORE_FILE")

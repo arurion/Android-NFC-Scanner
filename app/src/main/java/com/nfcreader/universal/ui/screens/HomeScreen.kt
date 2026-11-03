@@ -10,12 +10,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DataObject
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Nfc
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -62,6 +63,8 @@ fun HomeScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val historyList by viewModel.scanHistory.collectAsState()
+    val customKeys by viewModel.customKeys.collectAsState()
+    val keyInputError by viewModel.keyInputError.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.errorBanner) {
@@ -71,13 +74,13 @@ fun HomeScreen(
         }
     }
 
+    // 主要5タブにスッキリ整理 (「鍵」は右上の⚙️設定へ移行し、下のギチギチ感を解消)
     val tabs = listOf(
         NavTabItem("スキャナー", Icons.Default.Nfc, "nav_tab_scanner"),
         NavTabItem("駅・履歴", Icons.Default.Train, "nav_tab_transit"),
         NavTabItem("規格・仕様", Icons.Default.Layers, "nav_tab_specs"),
         NavTabItem("バイナリ", Icons.Default.DataObject, "nav_tab_binary"),
-        NavTabItem("履歴", Icons.Default.History, "nav_tab_history"),
-        NavTabItem("鍵", Icons.Default.Key, "nav_tab_keys")
+        NavTabItem("履歴", Icons.Default.History, "nav_tab_history")
     )
 
     val navItemColors = NavigationBarItemDefaults.colors(
@@ -95,7 +98,6 @@ fun HomeScreen(
         unselectedTextColor = TextNavyMuted
     )
 
-    // ガラス上のタイトル文字に柔らかい白い光彩を敷き、可読性を死守
     val captionGlow = Shadow(color = Color.White.copy(alpha = 0.85f), blurRadius = 10f)
 
     BoxWithConstraints(
@@ -104,9 +106,6 @@ fun HomeScreen(
             .background(MaterialTheme.colorScheme.background)
     ) {
         val isWideScreen = maxWidth >= 600.dp
-
-        val customKeys by viewModel.customKeys.collectAsState()
-        val keyInputError by viewModel.keyInputError.collectAsState()
 
         Scaffold(
             containerColor = Color.Transparent,
@@ -128,6 +127,18 @@ fun HomeScreen(
                                     maxLines = 1
                                 )
                             }
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = { viewModel.openSettings() },
+                            modifier = Modifier.testTag("open_settings_button")
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "設定",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
                     },
                     modifier = Modifier.glassChrome(
@@ -216,16 +227,22 @@ fun HomeScreen(
                             onDeleteItem = { viewModel.deleteHistoryItem(it) },
                             onClearAll = { viewModel.clearAllHistory() }
                         )
-                        5 -> KeysTab(
-                            keys = customKeys,
-                            inputError = keyInputError,
-                            onAddKey = { label, hex -> viewModel.addCustomKey(label, hex) },
-                            onDeleteKey = { viewModel.deleteCustomKey(it) },
-                            onClearInputError = { viewModel.clearKeyInputError() }
-                        )
                     }
                 }
             }
         }
+    }
+
+    if (uiState.isSettingsOpen) {
+        SettingsSheet(
+            keys = customKeys,
+            inputError = keyInputError,
+            currentGlassMode = uiState.glassDrawMode,
+            onGlassModeChange = { viewModel.setGlassDrawMode(it) },
+            onAddKey = { label, hex -> viewModel.addCustomKey(label, hex) },
+            onDeleteKey = { viewModel.deleteCustomKey(it) },
+            onClearInputError = { viewModel.clearKeyInputError() },
+            onDismiss = { viewModel.closeSettings() }
+        )
     }
 }
