@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.model.NfcTagData
 import com.nfcreader.universal.ui.components.HexDumpViewer
 import com.nfcreader.universal.ui.theme.GlassButton
+import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 
@@ -117,7 +118,7 @@ fun BinaryTab(
                     )
                 }
 
-                GlassButton(
+                GlassButtonSubtle(
                     onClick = {
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -128,9 +129,9 @@ fun BinaryTab(
                     },
                     modifier = Modifier.testTag("share_hex_dump_button")
                 ) {
-                    Icon(Icons.Default.Share, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(14.dp))
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("共有", color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("共有", fontWeight = FontWeight.Bold)
                 }
             }
         }

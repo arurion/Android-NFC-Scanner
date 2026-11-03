@@ -2,26 +2,24 @@ package com.nfcreader.universal.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// サックスホワイト: ほぼ白に近い淡い水色 (HSV 210°, 10%, 100%)
-val SaxWhite = Color(0xFFEAF5FF)
+// 基底背景色
+val SurfaceBase = Color(0xFFE2EEF9) // #E2EEF9
 
-// サックスブルー: 色付きガラスのティント色 (HSV 215°, 50%, 100%)
-val SaxBlue = Color(0xFF88BBFF)
+// サックスブルー (HSV 215°, 50%, 100%) & サックスホワイト (HSV 210°, 10%, 100%)
+val SaxWhite = Color(0xFFEAF5FF)    // #EAF5FF (本体用)
+val SaxBlue = Color(0xFF88BBFF)     // #88BBFF (枠・ナビ用)
 
-// 選択中・アクティブ時のスカイブルー
 val SaxBlueDeep = Color(0xFF2563EB)
+val SaxBlueDark = Color(0xFF1D4ED8)
 
-// 差し色: +120°の淡いピンク
-val AccentPink = Color(0xFFFF99DD)
-
-// 文字色: 深いネイビー (純黒にしない・コントラスト4.5:1死守)
+// テキスト (純黒を避けディープネイビーでコントラスト比4.5:1以上死守)
 val TextNavy = Color(0xFF0F172A)
-val TextNavyMuted = Color(0xFF47587A)
+val TextNavyMuted = Color(0xFF475569)
 
-// 縁取り: ギラつかないスモーキーシルバー
+// スモーキーシルバーエッジ
 val EdgeSilver = Color(0xFF64748B)
 
-// 状態色
+// 状態カラー (落ち着いたパステルファミリ)
 val StatusGreen = Color(0xFF10B981)
 val StatusAmber = Color(0xFFF59E0B)
 val StatusRose = Color(0xFFE11D48)

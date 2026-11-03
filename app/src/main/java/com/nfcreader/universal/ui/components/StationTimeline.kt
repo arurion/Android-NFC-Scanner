@@ -57,6 +57,7 @@ import com.nfcreader.universal.model.StationInfo
 import com.nfcreader.universal.model.TransitCardInfo
 import com.nfcreader.universal.model.TransitTransaction
 import com.nfcreader.universal.ui.theme.GlassButton
+import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 import com.nfcreader.universal.ui.theme.SaxBlue
@@ -78,14 +79,13 @@ fun StationTimeline(
     var showStationDictSheet by remember { mutableStateOf(false) }
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Hero Transit Summary Panel (フルガラス・サックスブルーティント)
+        // サマリーパネル (カード乱立をやめ1つの統合枠へ)
         GlassPanel(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
                 .testTag("transit_card_hero"),
             shape = GlassTokens.shape(GlassTokens.radiusLarge),
-            tint = SaxBlue.copy(alpha = 0.50f),
             elevated = true
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
@@ -98,14 +98,14 @@ fun StationTimeline(
                         Box(
                             modifier = Modifier
                                 .size(34.dp)
-                                .background(Color.White.copy(alpha = 0.35f), CircleShape),
+                                .background(SaxBlue.copy(alpha = 0.35f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.CreditCard,
                                 contentDescription = "IC Card",
                                 tint = SaxBlueDeep,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(10.dp))
@@ -118,7 +118,7 @@ fun StationTimeline(
 
                     Surface(
                         shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                        color = Color.White.copy(alpha = 0.40f)
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
                     ) {
                         Text(
                             text = "履歴 ${transitInfo.transactions.size}件",
@@ -142,7 +142,7 @@ fun StationTimeline(
                     text = formatter.format(transitInfo.currentBalance),
                     style = MaterialTheme.typography.headlineLarge.copy(
                         fontWeight = FontWeight.ExtraBold,
-                        fontSize = 32.sp
+                        fontSize = 34.sp
                     ),
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -180,7 +180,7 @@ fun StationTimeline(
             }
         }
 
-        // Section header with GlassButton
+        // セクションヘッダー + ぷっくり立体ボタン
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -194,22 +194,19 @@ fun StationTimeline(
                 fontWeight = FontWeight.Bold
             )
 
-            // ぷっくり立体化 GlassButton
-            GlassButton(
+            GlassButtonSubtle(
                 onClick = { showStationDictSheet = true },
                 modifier = Modifier.testTag("open_station_dictionary_button")
             ) {
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = Color.White,
                     modifier = Modifier.size(14.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "全国駅辞書 (${StationDatabase.getLoadedStationCount()}駅)",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -231,6 +228,7 @@ fun StationTimeline(
                 }
             }
         } else {
+            // アンチ・Bento Grid: 連続データ行
             GlassPanel(
                 modifier = Modifier.fillMaxWidth(),
                 shape = GlassTokens.shape(GlassTokens.radiusLarge)
@@ -277,6 +275,7 @@ fun TransitTransactionRow(
         else -> SaxBlueDeep
     }
 
+    // 乗車区間移動 (両方の駅が明確に存在する場合のみ)
     val isTrainRide = !tx.isShopping && !tx.isBus && !tx.isCharge &&
             !tx.entryStationName.isNullOrBlank() && !tx.exitStationName.isNullOrBlank()
 
@@ -299,7 +298,7 @@ fun TransitTransactionRow(
                 Box(
                     modifier = Modifier
                         .size(34.dp)
-                        .background(iconColor.copy(alpha = 0.18f), CircleShape),
+                        .background(iconColor.copy(alpha = 0.16f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -362,13 +361,14 @@ fun TransitTransactionRow(
             }
         }
 
+        // --- 文脈に応じた駅表示 (乗車移動のみ矢印！チャージや入場は単一駅表示) ---
         if (isTrainRide) {
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Color.White.copy(alpha = 0.45f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
                         shape = RoundedCornerShape(GlassTokens.radiusSmall)
                     )
                     .padding(horizontal = 10.dp, vertical = 6.dp),
@@ -420,7 +420,7 @@ fun TransitTransactionRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(
-                            color = Color.White.copy(alpha = 0.40f),
+                            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(GlassTokens.radiusSmall)
                         )
                         .padding(horizontal = 10.dp, vertical = 5.dp),
@@ -454,11 +454,11 @@ fun TransitTransactionRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Color.White.copy(alpha = 0.40f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(GlassTokens.radiusSmall)
                     )
                     .padding(horizontal = 10.dp, vertical = 5.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     imageVector = Icons.Default.DirectionsBus,
@@ -506,7 +506,7 @@ fun TransitTransactionRow(
                     .fillMaxWidth()
                     .padding(top = 6.dp)
                     .background(
-                        color = Color.White.copy(alpha = 0.55f),
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.7f),
                         shape = RoundedCornerShape(GlassTokens.radiusSmall)
                     )
                     .padding(8.dp)
@@ -537,83 +537,61 @@ fun StationDictionarySheet(onDismiss: () -> Unit) {
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color.Transparent,
-        dragHandle = null
+        sheetState = sheetState
     ) {
-        GlassPanel(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp),
-            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 12.dp, bottomEnd = 12.dp),
-            tint = SaxBlue.copy(alpha = 0.52f),
-            elevated = true
+                .padding(16.dp)
         ) {
-            Column(
+            Text(
+                text = "全国サイバネ駅コード辞書",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "約6,000駅の線区コード・駅順コードを収録しています",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(18.dp)
+                    .testTag("station_dict_search_input"),
+                placeholder = { Text("駅名、路線名、会社名 (例: 新宿, 山手)...") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                singleLine = true
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Text(
+                text = "検索結果: ${results.size}件",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            GlassPanel(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(380.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "全国サイバネ駅コード辞書",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                    GlassButton(onClick = onDismiss) {
-                        Text("閉じる", color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                }
-
-                Text(
-                    text = "約6,000駅の線区コード・駅順コードを収録しています",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("station_dict_search_input"),
-                    placeholder = { Text("駅名、路線名、会社名 (例: 新宿, 山手)...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    singleLine = true
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = "検索結果: ${results.size}件",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                GlassPanel(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(380.dp),
-                    tint = Color.White.copy(alpha = 0.60f)
-                ) {
-                    LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                        itemsIndexed(results) { idx, item ->
-                            if (idx > 0) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(horizontal = 10.dp),
-                                    color = GlassTokens.edgeStroke
-                                )
-                            }
-                            StationDictItemRow(item = item)
+                LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                    itemsIndexed(results) { idx, item ->
+                        if (idx > 0) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 10.dp),
+                                color = GlassTokens.edgeStroke
+                            )
                         }
+                        StationDictItemRow(item = item)
                     }
                 }
             }

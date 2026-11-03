@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.nfcreader.universal.model.NdefParsedRecord
 import com.nfcreader.universal.model.NfcTagData
-import com.nfcreader.universal.ui.theme.GlassButton
+import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
 
@@ -332,7 +332,7 @@ fun NdefRecordRow(record: NdefParsedRecord) {
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            GlassButton(
+            GlassButtonSubtle(
                 onClick = {
                     try {
                         val intent = Intent(Intent.ACTION_VIEW, Uri.parse(record.uri))
@@ -343,9 +343,9 @@ fun NdefRecordRow(record: NdefParsedRecord) {
                 },
                 modifier = Modifier.testTag("open_ndef_uri_button_${record.index}")
             ) {
-                Icon(Icons.Default.OpenInBrowser, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
+                Icon(Icons.Default.OpenInBrowser, contentDescription = null, modifier = Modifier.size(14.dp))
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("ブラウザで開く", color = Color.White, fontWeight = FontWeight.Bold)
+                Text("ブラウザで開く", fontWeight = FontWeight.Bold)
             }
         }
 

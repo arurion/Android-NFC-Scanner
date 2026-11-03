@@ -31,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.nfcreader.universal.ui.NfcReaderViewModel
 import com.nfcreader.universal.ui.theme.GlassTokens
-import com.nfcreader.universal.ui.theme.LocalGlassDrawMode
 import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.SaxBlueDeep
 import com.nfcreader.universal.ui.theme.TextNavyMuted
@@ -76,6 +74,7 @@ fun HomeScreen(
         }
     }
 
+    // 主要5タブ (下のギチギチ感を完全解消)
     val tabs = listOf(
         NavTabItem("スキャナー", Icons.Default.Nfc, "nav_tab_scanner"),
         NavTabItem("駅・履歴", Icons.Default.Train, "nav_tab_transit"),
@@ -101,16 +100,25 @@ fun HomeScreen(
 
     val captionGlow = Shadow(color = Color.White.copy(alpha = 0.85f), blurRadius = 10f)
 
-    // CompositionLocalProvider でアプリ全体へ即時反映！
-    CompositionLocalProvider(LocalGlassDrawMode provides uiState.glassDrawMode) {
-        BoxWithConstraints(
-            modifier = modifier
-                .fillMaxSize()
-                // 最背面に環境光グラデーションを敷き、半透明ガラスが「透ける理由」を作る
-                .background(GlassTokens.ambientBackdropBrush)
-        ) {
-            val isWideScreen = maxWidth >= 600.dp
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxSize()
+            // 最背面に環境光グラデーションレイヤーを敷く (プロトタイプ完全準拠)
+            .background(GlassTokens.ambientBackdropBrush)
+    ) {
+        val isWideScreen = maxWidth >= 600.dp
 
+        // 【右上の⚙️を押したら画面全体で設定＆鍵マネージャーを開く】
+        if (uiState.isSettingsOpen) {
+            SettingsScreen(
+                keys = customKeys,
+                inputError = keyInputError,
+                onAddKey = { label, hex -> viewModel.addCustomKey(label, hex) },
+                onDeleteKey = { viewModel.deleteCustomKey(it) },
+                onClearInputError = { viewModel.clearKeyInputError() },
+                onClose = { viewModel.closeSettings() }
+            )
+        } else {
             Scaffold(
                 containerColor = Color.Transparent,
                 topBar = {
@@ -235,19 +243,6 @@ fun HomeScreen(
                     }
                 }
             }
-        }
-
-        if (uiState.isSettingsOpen) {
-            SettingsSheet(
-                keys = customKeys,
-                inputError = keyInputError,
-                currentGlassMode = uiState.glassDrawMode,
-                onGlassModeChange = { viewModel.setGlassDrawMode(it) },
-                onAddKey = { label, hex -> viewModel.addCustomKey(label, hex) },
-                onDeleteKey = { viewModel.deleteCustomKey(it) },
-                onClearInputError = { viewModel.clearKeyInputError() },
-                onDismiss = { viewModel.closeSettings() }
-            )
         }
     }
 }

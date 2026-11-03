@@ -45,9 +45,9 @@ import com.nfcreader.universal.ui.NfcHardwareState
 import com.nfcreader.universal.ui.NfcUiState
 import com.nfcreader.universal.ui.components.NfcRadarAnimation
 import com.nfcreader.universal.ui.theme.GlassButton
+import com.nfcreader.universal.ui.theme.GlassButtonSubtle
 import com.nfcreader.universal.ui.theme.GlassPanel
 import com.nfcreader.universal.ui.theme.GlassTokens
-import com.nfcreader.universal.ui.theme.SaxBlue
 import com.nfcreader.universal.ui.theme.StatusRose
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -103,7 +103,7 @@ fun ScannerTab(
                             text = if (state.hardwareState == NfcHardwareState.DISABLED)
                                 "端末の設定からNFCをONにしてください。"
                             else
-                                "物理NFCがない環境でも、下の「デモデータ」ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
+                                "物理NFCがない環境でも、下の「デモデータ」機能ですべての機能（駅名解析・バイナリダンプ等）を体験できます。",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -162,7 +162,6 @@ fun ScannerTab(
                     .fillMaxWidth()
                     .testTag("scanned_tag_summary_card"),
                 shape = GlassTokens.shape(GlassTokens.radiusLarge),
-                tint = SaxBlue.copy(alpha = 0.45f),
                 elevated = true
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -173,13 +172,13 @@ fun ScannerTab(
                     ) {
                         Surface(
                             shape = RoundedCornerShape(GlassTokens.radiusSmall),
-                            color = Color.White.copy(alpha = 0.45f)
+                            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
                         ) {
                             Text(
                                 text = "検出中のカード",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
@@ -230,13 +229,13 @@ fun ScannerTab(
                             }
                         }
 
-                        GlassButton(
+                        GlassButtonSubtle(
                             onClick = onNavigateToSpecs,
                             modifier = Modifier.weight(1f).testTag("view_specs_analysis_button")
                         ) {
-                            Icon(Icons.Default.Layers, contentDescription = null, tint = Color.White, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Layers, contentDescription = null, modifier = Modifier.size(18.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("規格・ダンプ", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("規格・ダンプ", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -244,7 +243,7 @@ fun ScannerTab(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // デモカード読み込みエリア
+        // デモカード読み込み
         GlassPanel(
             modifier = Modifier.fillMaxWidth(),
             shape = GlassTokens.shape(GlassTokens.radiusLarge)
@@ -276,22 +275,22 @@ fun ScannerTab(
                         Text("Suica", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
                     }
 
-                    GlassButton(
+                    GlassButtonSubtle(
                         onClick = onLoadMifareDemo,
                         modifier = Modifier.weight(1f).testTag("load_demo_mifare_button")
                     ) {
-                        Icon(Icons.Default.CreditCard, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+                        Icon(Icons.Default.CreditCard, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("MIFARE", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
+                        Text("MIFARE", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
 
-                    GlassButton(
+                    GlassButtonSubtle(
                         onClick = onLoadNdefDemo,
                         modifier = Modifier.weight(1f).testTag("load_demo_ndef_button")
                     ) {
-                        Icon(Icons.Default.Link, contentDescription = null, tint = Color.White, modifier = Modifier.size(15.dp))
+                        Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(15.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("NDEF", color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
+                        Text("NDEF", fontWeight = FontWeight.Bold, maxLines = 1)
                     }
                 }
             }
