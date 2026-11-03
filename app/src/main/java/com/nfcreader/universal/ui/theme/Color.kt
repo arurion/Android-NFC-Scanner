@@ -12,6 +12,9 @@ val SaxBlue = Color(0xFF88BBFF)     // #88BBFF (枠・ナビ用)
 val SaxBlueDeep = Color(0xFF2563EB)
 val SaxBlueDark = Color(0xFF1D4ED8)
 
+// 差し色: +120°の淡いピンク
+val AccentPink = Color(0xFFFF99DD)
+
 // テキスト (純黒を避けディープネイビーでコントラスト比4.5:1以上死守)
 val TextNavy = Color(0xFF0F172A)
 val TextNavyMuted = Color(0xFF475569)

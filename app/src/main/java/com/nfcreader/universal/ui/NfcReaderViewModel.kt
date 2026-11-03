@@ -1,7 +1,6 @@
 package com.nfcreader.universal.ui
 
 import android.app.Application
-import android.content.Context
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import androidx.lifecycle.AndroidViewModel
@@ -14,7 +13,6 @@ import com.nfcreader.universal.data.db.AppDatabase
 import com.nfcreader.universal.data.db.CustomKeyEntity
 import com.nfcreader.universal.data.db.TagScanEntity
 import com.nfcreader.universal.model.NfcTagData
-import com.nfcreader.universal.ui.theme.GlassDrawMode
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,8 +34,7 @@ data class NfcUiState(
     val isLoading: Boolean = false,
     val statusMessage: String = "スマートフォン背面にNFCカードをかざしてください",
     val errorBanner: String? = null,
-    val isSettingsOpen: Boolean = false,
-    val glassDrawMode: GlassDrawMode = GlassDrawMode.STANDARD
+    val isSettingsOpen: Boolean = false
 )
 
 sealed class KeyInputError {
@@ -47,19 +44,11 @@ sealed class KeyInputError {
 
 class NfcReaderViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val prefs = application.getSharedPreferences("nfc_reader_prefs", Context.MODE_PRIVATE)
     private val db = AppDatabase.getInstance(application)
     private val dao = db.tagScanDao()
     private val keyDao = db.customKeyDao()
 
-    private val initialMode = try {
-        val saved = prefs.getString("glass_draw_mode", GlassDrawMode.STANDARD.name)
-        GlassDrawMode.valueOf(saved ?: GlassDrawMode.STANDARD.name)
-    } catch (_: Exception) {
-        GlassDrawMode.STANDARD
-    }
-
-    private val _uiState = MutableStateFlow(NfcUiState(glassDrawMode = initialMode))
+    private val _uiState = MutableStateFlow(NfcUiState())
     val uiState: StateFlow<NfcUiState> = _uiState.asStateFlow()
 
     private val _keyInputError = MutableStateFlow<KeyInputError?>(null)
@@ -86,11 +75,6 @@ class NfcReaderViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun openSettings() { _uiState.value = _uiState.value.copy(isSettingsOpen = true) }
     fun closeSettings() { _uiState.value = _uiState.value.copy(isSettingsOpen = false) }
-
-    fun setGlassDrawMode(mode: GlassDrawMode) {
-        _uiState.value = _uiState.value.copy(glassDrawMode = mode)
-        prefs.edit().putString("glass_draw_mode", mode.name).apply()
-    }
 
     fun updateNfcStatus(adapter: NfcAdapter?) {
         val hw = when {
